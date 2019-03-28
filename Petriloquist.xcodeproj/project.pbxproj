@@ -12,6 +12,7 @@
 		0E771DB3224CD1FC0051DE5D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E771DB1224CD1FC0051DE5D /* Main.storyboard */; };
 		0E771DB5224CD1FF0051DE5D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0E771DB4224CD1FF0051DE5D /* Assets.xcassets */; };
 		0E771DB8224CD1FF0051DE5D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E771DB6224CD1FF0051DE5D /* LaunchScreen.storyboard */; };
+		0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		0E771DB4224CD1FF0051DE5D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0E771DB7224CD1FF0051DE5D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0E771DB9224CD1FF0051DE5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CentralBluetoothManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,6 +56,7 @@
 		0E771DAC224CD1FC0051DE5D /* Petriloquist */ = {
 			isa = PBXGroup;
 			children = (
+				0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */,
 				0E771DAD224CD1FC0051DE5D /* AppDelegate.swift */,
 				0E771DAF224CD1FC0051DE5D /* ViewController.swift */,
 				0E771DB1224CD1FC0051DE5D /* Main.storyboard */,
@@ -137,6 +140,7 @@
 			files = (
 				0E771DB0224CD1FC0051DE5D /* ViewController.swift in Sources */,
 				0E771DAE224CD1FC0051DE5D /* AppDelegate.swift in Sources */,
+				0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
