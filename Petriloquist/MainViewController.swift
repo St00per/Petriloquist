@@ -24,14 +24,27 @@ class MainViewController: UIViewController {
         
         let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
         downloadView.addGestureRecognizer(tapDownload)
-        
-        talkButton.addTarget(self, action:#selector(talkBtnPressed(_:)), for: .touchDown)
-        //talkButton.addTarget(self, action:#selector(talkBtnReleased(_:)), for: .touchUpInside)
-        
-        
-        
+    
     }
     
+    
+    @IBAction func startListen(_ sender: UIButton) {
+        print("LISTEN PRESSED")
+    }
+    
+    @IBAction func stopListen(_ sender: UIButton) {
+        print("Listen released")
+    }
+    
+    
+    @IBAction func startTalk(_ sender: UIButton) {
+        print("TALK PRESSED")
+    }
+    
+    @IBAction func stopTalk(_ sender: UIButton) {
+        print("TALK released")
+    }
+ 
     @objc func connectToDevice() {
         print("Start connecting...")
     }
@@ -39,26 +52,5 @@ class MainViewController: UIViewController {
     @objc func downloadVoice() {
         print("Start downloading...")
     }
-    
-    @objc func startVoiceRecording() {
-        
-            print("TALK PRESSED")
-      
-    }
-    
-    @objc func startVoiceListen() {
-        print("LISTEN PRESSED")
-    }
-    
-    @objc func talkButtonSelection() {
-        talkButton.isSelected = true
-    }
-    
-    @objc func talkBtnPressed(_ sender: Any) {
-        perform(#selector(startVoiceRecording) , with: (Any).self, afterDelay: 0)
-    }
-    
-    @objc func talkBtnReleased(_ sender: Any) {
-        talkButton.isSelected = false
-    }
+ 
 }

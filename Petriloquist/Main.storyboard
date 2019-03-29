@@ -73,6 +73,12 @@
                                                             </label>
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f03-Cj-9N9">
                                                                 <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
+                                                                <connections>
+                                                                    <action selector="startListen:" destination="bA5-gp-b9X" eventType="touchDown" id="mfb-sC-yKi"/>
+                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchUpInside" id="FKn-0q-IK9"/>
+                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchCancel" id="PCO-6d-4R4"/>
+                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchUpOutside" id="yo6-UP-zzs"/>
+                                                                </connections>
                                                             </button>
                                                         </subviews>
                                                         <color key="backgroundColor" red="0.8423995719829076" green="0.54417664064487936" blue="0.043681482194175184" alpha="1" colorSpace="calibratedRGB"/>
@@ -99,6 +105,12 @@
                                                     </label>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UKs-co-Fvn">
                                                         <rect key="frame" x="0.0" y="0.0" width="355" height="130"/>
+                                                        <connections>
+                                                            <action selector="startTalk:" destination="bA5-gp-b9X" eventType="touchDown" id="ju6-iM-GcD"/>
+                                                            <action selector="stopTalk:" destination="bA5-gp-b9X" eventType="touchUpInside" id="Q40-Qz-KmY"/>
+                                                            <action selector="stopTalk:" destination="bA5-gp-b9X" eventType="touchUpOutside" id="Uf4-zh-Gh8"/>
+                                                            <action selector="stopTalk:" destination="bA5-gp-b9X" eventType="touchCancel" id="YfK-4q-21k"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <color key="backgroundColor" red="0.60271537303924561" green="0.83700784663079486" blue="0.60271537303924561" alpha="1" colorSpace="calibratedRGB"/>
