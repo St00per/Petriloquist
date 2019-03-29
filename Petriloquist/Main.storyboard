@@ -10,10 +10,10 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Main View Controller-->
         <scene sceneID="Bt3-ds-vvm">
             <objects>
-                <viewController id="bA5-gp-b9X" sceneMemberID="viewController">
+                <viewController id="bA5-gp-b9X" customClass="MainViewController" customModule="Petriloquist" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="axg-yg-fH2">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -71,12 +71,19 @@
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
                                                             </label>
+                                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f03-Cj-9N9">
+                                                                <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
+                                                            </button>
                                                         </subviews>
                                                         <color key="backgroundColor" red="0.8423995719829076" green="0.54417664064487936" blue="0.043681482194175184" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
                                                             <constraint firstItem="ZKr-fX-adE" firstAttribute="centerX" secondItem="gRW-vS-lCL" secondAttribute="centerX" id="1EA-qP-jgf"/>
+                                                            <constraint firstItem="f03-Cj-9N9" firstAttribute="leading" secondItem="gRW-vS-lCL" secondAttribute="leading" id="2qg-D6-xm4"/>
+                                                            <constraint firstAttribute="trailing" secondItem="f03-Cj-9N9" secondAttribute="trailing" id="BX2-NB-It7"/>
                                                             <constraint firstAttribute="width" constant="172" id="EZX-QC-Ymq"/>
+                                                            <constraint firstAttribute="bottom" secondItem="f03-Cj-9N9" secondAttribute="bottom" id="U5F-Fj-KyB"/>
                                                             <constraint firstItem="ZKr-fX-adE" firstAttribute="centerY" secondItem="gRW-vS-lCL" secondAttribute="centerY" id="u5z-Ir-fNJ"/>
+                                                            <constraint firstItem="f03-Cj-9N9" firstAttribute="top" secondItem="gRW-vS-lCL" secondAttribute="top" id="wF2-SF-Rcn"/>
                                                         </constraints>
                                                     </view>
                                                 </subviews>
@@ -90,12 +97,19 @@
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
+                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UKs-co-Fvn">
+                                                        <rect key="frame" x="0.0" y="0.0" width="355" height="130"/>
+                                                    </button>
                                                 </subviews>
                                                 <color key="backgroundColor" red="0.60271537303924561" green="0.83700784663079486" blue="0.60271537303924561" alpha="1" colorSpace="calibratedRGB"/>
                                                 <constraints>
                                                     <constraint firstItem="LCl-UL-Q4o" firstAttribute="centerX" secondItem="Rpl-fF-l5T" secondAttribute="centerX" id="0ZT-3K-MgL"/>
+                                                    <constraint firstItem="UKs-co-Fvn" firstAttribute="leading" secondItem="Rpl-fF-l5T" secondAttribute="leading" id="9u7-R9-3DT"/>
+                                                    <constraint firstItem="UKs-co-Fvn" firstAttribute="top" secondItem="Rpl-fF-l5T" secondAttribute="top" id="H0X-78-hJs"/>
+                                                    <constraint firstAttribute="trailing" secondItem="UKs-co-Fvn" secondAttribute="trailing" id="X3Z-xJ-ufO"/>
                                                     <constraint firstItem="LCl-UL-Q4o" firstAttribute="centerY" secondItem="Rpl-fF-l5T" secondAttribute="centerY" id="XSe-GQ-SwA"/>
                                                     <constraint firstAttribute="height" constant="130" id="p9F-5V-InE"/>
+                                                    <constraint firstAttribute="bottom" secondItem="UKs-co-Fvn" secondAttribute="bottom" id="qAU-lj-Vfi"/>
                                                 </constraints>
                                             </view>
                                         </subviews>
@@ -117,6 +131,12 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="9Y7-wZ-Qzt"/>
                     </view>
+                    <connections>
+                        <outlet property="connectView" destination="BSh-bd-BL7" id="5mH-CP-xQp"/>
+                        <outlet property="downloadView" destination="ZPK-sT-LTh" id="sBT-yL-3ow"/>
+                        <outlet property="listenButton" destination="f03-Cj-9N9" id="i4X-gS-Xfp"/>
+                        <outlet property="talkButton" destination="UKs-co-Fvn" id="9zR-3w-IkT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W4d-DU-XDl" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
