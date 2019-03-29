@@ -9,7 +9,7 @@
 import Foundation
 import CoreBluetooth
 
-let multiLightCBUUID = CBUUID(string: "0xFFE0")
+let petriloquistCBUUID = CBUUID(string: "0xFFE0")
 let moduleFunctionConfigurationCBUUID = CBUUID(string: "FFE1")
 
 public protocol BluetoothManagerConnectDelegate {
@@ -59,11 +59,9 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
         case .poweredOn:
             print("central.state is .poweredOn")
             if isFirstDidLoad {
-                centralManager.scanForPeripherals(withServices: [multiLightCBUUID])
-                
+                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
             }
         }
-
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -71,7 +69,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-
+        
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -104,44 +102,22 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             peripheral.discoverCharacteristics(nil, for: service)
         }
     }
-  
-        func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService,
-                        error: Error?) {
-            guard let characteristics = service.characteristics else { return }
     
-            for characteristic in characteristics {
-                print(characteristic)
-                print(characteristic.properties)
-                }
-            }
-    
-        func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-            guard error == nil else {
-                print("Error discovering services: error")
-                return
-            }
-            print("Message sent")
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService,
+                    error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+        
+        for characteristic in characteristics {
+            print(characteristic)
+            print(characteristic.properties)
         }
-    
-    func OnOff() -> Data {
-        
-        var dataToWrite = Data()
-        dataToWrite.append(0xE8)
-        dataToWrite.append(0xA1)
-        dataToWrite.append(0x02)
-        
-        return dataToWrite
     }
     
-    func frequency1000() -> Data {
-        
-        var dataToWrite = Data()
-        
-        dataToWrite.append(0xE8)
-        dataToWrite.append(0xA2)
-        dataToWrite.append(0x03)
-        dataToWrite.append(0xE8)
-        
-        return dataToWrite
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard error == nil else {
+            print("Error discovering services: error")
+            return
+        }
+        print("Message sent")
     }
 }
