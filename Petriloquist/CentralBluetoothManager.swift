@@ -9,7 +9,7 @@
 import Foundation
 import CoreBluetooth
 
-let petriloquistCBUUID = CBUUID(string: "0xFFE0")
+let petriloquistCBUUID = CBUUID(string: "6C671877-0E08-4A92-921C-41F6E17A2489")
 let moduleFunctionConfigurationCBUUID = CBUUID(string: "FFE1")
 
 let txCharUUID = CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3")
