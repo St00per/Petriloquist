@@ -30,12 +30,10 @@ class CentralBluetoothManager: NSObject {
     public static let `default` = CentralBluetoothManager()
     
     var centralManager: CBCentralManager!
-    // var foundDevices: [CBPeripheral] = []
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
     var peripheral: CBPeripheral!
-    var isFirstDidLoad = true
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
@@ -63,11 +61,8 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
             print("central.state is .poweredOff")
         case .poweredOn:
             print("central.state is .poweredOn")
-            if isFirstDidLoad {
-                centralManager.scanForPeripherals(withServices: nil)
-                
-            }
-        }
+                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
+         }
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -76,11 +71,12 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
-        print(peripheral.name)
-        if peripheral.name == "Petriloquist Test Device" {
+       
+        if self.peripheral.name == "Petriloquist Test Device" {
             //peripheral.discoverServices(nil)
-            print(peripheral)
+            print(self.peripheral)
             central.stopScan()
+            self.peripheral.delegate = self
             central.connect(self.peripheral)
             //connect(peripheral: peripheral)
 
@@ -126,6 +122,13 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         for characteristic in characteristics {
             print(characteristic)
             print(characteristic.properties)
+            if characteristic.properties.contains(.write) {
+                let text = "TESTING TRANSFER"
+                guard let data = text.data(using: .utf8) else { return }
+                self.peripheral.writeValue(data,
+                                      for: characteristic,
+                                      type: CBCharacteristicWriteType.withoutResponse)
+            }
         }
         print("Max write value: \(peripheral.maximumWriteValueLength(for: .withResponse))")
     }
