@@ -21,6 +21,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var textedVoice: String = ""
+    var testArray: [Float32] = []
+    var wholeTestData = Data()
+    var testDataTimer = Timer()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +32,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         
         let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
         downloadView.addGestureRecognizer(tapDownload)
+        
+        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendNextSlice), userInfo: nil, repeats: true)
         
         recordingSession = AVAudioSession.sharedInstance()
         do {
@@ -65,7 +70,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         ]
         
         do {
-            audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            //audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
+            //audioRecorder = try AVAudioRecorder(
             audioRecorder.delegate = self
             audioRecorder.record()
             
@@ -75,33 +81,60 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
     
-    static func readFile(url: URL) -> [Float] {
-        guard
-            let file = try? AVAudioFile(forReading: url),
-            let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: file.fileFormat.sampleRate, channels: 1, interleaved: false) else {
-                print("Error in readFile! returning empty array...")
-                return []
+    func fillTestFloatArray() {
+        for index in 1...1024 {
+            testArray.append(Float32(index))
         }
-        let bufferCapacity: AVAudioFrameCount = 1024
-        var readed: AVAudioFrameCount = bufferCapacity
-        var array = [Float]()
-        while readed == bufferCapacity {
-            if let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferCapacity) {
-                do {
-                    try file.read(into: buf)
-                } catch {
-                    print(url.lastPathComponent)
-                    print("Error: \(error.localizedDescription)")
-                }
-                readed = buf.frameLength
-                // this makes a copy, you might not want that
-                if let bufChannelData = buf.floatChannelData {
-                    array.append(contentsOf: Array(UnsafeBufferPointer(start: bufChannelData[0], count:Int(readed))))
-                }
+        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+    }
+    
+    @objc fileprivate func sendNextSlice() {
+        if CentralBluetoothManager.default.isTXPortReady {
+            CentralBluetoothManager.default.isTXPortReady = false
+            var startingPoint = 0
+            let dataPieceSize = 128
+            
+            let testData: Data = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+            
+            let peripheral = CentralBluetoothManager.default.foundDevices[0]
+            guard let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic else { return }
+            
+            //transfer data with standart write command
+            peripheral.writeValue(testData,
+                                  for: peripheralCharacteristic,
+                                  type: CBCharacteristicWriteType.withoutResponse)
+            //transfer data with L2CAPChannel
+            guard let outputStream = CentralBluetoothManager.default.channel?.outputStream else {
+                return
+            }
+            let bytesWritten = testData.withUnsafeBytes { outputStream.write($0, maxLength: dataPieceSize) }
+            print("bytesWritten = \(bytesWritten)")
+  
+            
+            startingPoint += dataPieceSize
+            if startingPoint == dataPieceSize {
+                startingPoint = 0
+                testDataTimer.invalidate()
             }
         }
-        return array
     }
+    
+    
+    
+    func convertBufferPCMDataToFloat() -> [Float] {
+        let bufferCapacity: AVAudioFrameCount = 1024
+        
+        guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 1024, channels: 1, interleaved: false),
+            let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferCapacity) else { return [0]}
+        let bufChannelData = buf.floatChannelData
+        
+        guard let dataValue = bufChannelData?.pointee else { return [0]}
+        let channelDataValueArray = stride(from: 0,
+                                           to: Int(1024),
+                                           by: 1).map{ dataValue[$0] }
+        return channelDataValueArray
+    }
+    
     
     func finishRecording(success: Bool) {
         audioRecorder.stop()
@@ -114,23 +147,21 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             // recording failed :(
         }
     }
-   
-//    func sendVoiceToChannel () {
-//        guard let ostream = CentralBluetoothManager.default.channel?.outputStream, let voice = "recorded voice", let data = voice.data(using: )  else {
-//            return
-//        }
-//        let bytesWritten =  data.withUnsafeBytes { ostream.write($0, maxLength: data.count) }
-//    }
-//
-//    func sendVoiceToDevice(recordedVoice: String) {
-//        let peripheral = CentralBluetoothManager.default.foundDevices[0]
-//        let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic
-//        var transferCharacteristic: CBMutableCharacteristic? = CentralBluetoothManager.default.transferCharacteristic
-//        let sendedVoice = "VOICE DATA"
-//        peripheral.writeValue(sendedVoice,
-//                              for: peripheralCharacteristic,
-//                              type: CBCharacteristicWriteType.withoutResponse)
-//    }
+    
+    //    func sendVoiceToChannel () {
+    //        guard let ostream = CentralBluetoothManager.default.channel?.outputStream, let voice = "recorded voice", let data = voice.data(using: )  else {
+    //            return
+    //        }
+    //        let bytesWritten =  data.withUnsafeBytes { ostream.write($0, maxLength: data.count) }
+    //    }
+    //
+    func sendVoiceToDevice(recordedVoice: String) {
+        let peripheral = CentralBluetoothManager.default.foundDevices[0]
+        let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic
+        var transferCharacteristic: CBMutableCharacteristic? = CentralBluetoothManager.default.transferCharacteristic
+        let sendedVoice = "VOICE DATA"
+        //peripheral.writeValue(sendedVoice, for: peripheralCharacteristic, type: CBCharacteristicWriteType.withoutResponse)
+    }
     
     func sendTextedVoiceToDevice() {
         guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
@@ -141,6 +172,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         let bytesWritten =  data?.withUnsafeBytes { ostream.write($0, maxLength: data?.count ?? 0) }
         
     }
+    
+    
     
     @IBAction func startListen(_ sender: UIButton) {
         print("LISTEN PRESSED")

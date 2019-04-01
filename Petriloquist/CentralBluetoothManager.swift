@@ -12,6 +12,9 @@ import CoreBluetooth
 let petriloquistCBUUID = CBUUID(string: "0xFFE0")
 let moduleFunctionConfigurationCBUUID = CBUUID(string: "FFE1")
 
+let txCharUUID = CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3")
+let rxCharUUID = CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616")
+
 public protocol BluetoothManagerConnectDelegate {
     func connectingStateSet()
 }
@@ -33,6 +36,7 @@ class CentralBluetoothManager: NSObject {
     var channel: CBL2CAPChannel?
     
     var isFirstDidLoad = true
+    var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
     
@@ -114,6 +118,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             print(characteristic)
             print(characteristic.properties)
         }
+        print("Max write value: \(peripheral.maximumWriteValueLength(for: .withResponse))")
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
