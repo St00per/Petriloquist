@@ -37,6 +37,8 @@ class CentralBluetoothManager: NSObject {
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
+    var txCharacteristic: CBCharacteristic!
+    var rxCharacteristic: CBCharacteristic!
     
     override init() {
         super.init()
@@ -120,14 +122,14 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         guard let characteristics = service.characteristics else { return }
         
         for characteristic in characteristics {
-            print(characteristic)
-            print(characteristic.properties)
             if characteristic.properties.contains(.write) {
-                let text = "TESTING TRANSFER"
-                guard let data = text.data(using: .utf8) else { return }
-                self.peripheral.writeValue(data,
-                                      for: characteristic,
-                                      type: CBCharacteristicWriteType.withoutResponse)
+                print(characteristic)
+                self.txCharacteristic = characteristic
+                //sendData()
+            }
+            if characteristic.properties.contains(.read) {
+                self.rxCharacteristic = characteristic
+                self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
         }
         print("Max write value: \(peripheral.maximumWriteValueLength(for: .withResponse))")
