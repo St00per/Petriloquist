@@ -96,8 +96,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             
             let testData: Data = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
             
-            let peripheral = CentralBluetoothManager.default.foundDevices[0]
-            guard let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic else { return }
+            guard let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic,
+                let peripheral = CentralBluetoothManager.default.peripheral
+                else { return }
             
             //transfer data with standart write command
             peripheral.writeValue(testData,
@@ -156,7 +157,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     //    }
     //
     func sendVoiceToDevice(recordedVoice: String) {
-        let peripheral = CentralBluetoothManager.default.foundDevices[0]
+        //let peripheral = CentralBluetoothManager.default.foundDevices[0]
         let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic
         var transferCharacteristic: CBMutableCharacteristic? = CentralBluetoothManager.default.transferCharacteristic
         let sendedVoice = "VOICE DATA"
