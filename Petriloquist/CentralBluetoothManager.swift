@@ -33,7 +33,7 @@ class CentralBluetoothManager: NSObject {
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
-    var peripheral: CBPeripheral! 
+    var peripheral: CBPeripheral!
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
@@ -107,6 +107,10 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
 
 extension CentralBluetoothManager: CBPeripheralDelegate {
     
+    func peripheralIsReady(toSendWriteWithoutResponse peripheral: CBPeripheral) {
+        print("PERIPHERAL IS READY TO WRITE")
+    }
+    
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         guard let services = self.peripheral.services else { return }
         for service in services {
@@ -123,12 +127,12 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
                 print(characteristic)
                 self.txCharacteristic = characteristic
-                if let dataValue = self.txCharacteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
-                    print("Opening channel \(psm)")
+                //if let dataValue = self.txCharacteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
+                    print("Opening channel \(192)")
                     peripheral.openL2CAPChannel(CBL2CAPPSM(192))
-                } else {
-                    print("Problem decoding PSM")
-                }
+                //} else {
+                    //print("Problem decoding PSM")
+               // }
             }
             if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
                 self.rxCharacteristic = characteristic

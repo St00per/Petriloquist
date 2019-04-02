@@ -39,6 +39,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         fillTestFloatArray()
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         print(wholeTestData.count)
+        
         managerBluetooth = CentralBluetoothManager.default
         
         recordingSession = AVAudioSession.sharedInstance()
@@ -88,7 +89,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray() {
-        for _ in 1...512 {
+        for _ in 1...2016 {
             testArray.append(Float32(1))
         }
     }
@@ -155,26 +156,45 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
  
     var startingPoint = 0
-    let dataPieceSize = 128
-    @objc func sendData() {
-        
-        for _ in 0...16  {
-            //            let text = testArray[index]
-            //            guard let data = text.data(using: .utf8) else {
-            //                return
-            //            }
-            //let bytesWritten = data.withUnsafeBytes { outputStream.write($0, maxLength: 512) }
-            //, let outputStream = CentralBluetoothManager.default.channel?.outputStream
-            
-            let testData: Data = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-            self.startingPoint = startingPoint + dataPieceSize
-            CentralBluetoothManager.default.peripheral.writeValue(testData,
-                                                                  for: CentralBluetoothManager.default.txCharacteristic,
-                                                                  type: CBCharacteristicWriteType.withoutResponse)
-            print(startingPoint)
+    let dataPieceSize = 182
+    var piecesCount = 0
+    //var sendedDataSize
+//    @objc func sendData() {
+//
+//        for _ in 0...(wholeTestData.count/dataPieceSize)  {
+//
+//            var testData: Data
+//            testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+//            self.startingPoint = startingPoint + dataPieceSize
+//
+//            CentralBluetoothManager.default.peripheral.writeValue(testData,
+//                                                                  for: CentralBluetoothManager.default.txCharacteristic,
+//                                                                  type: CBCharacteristicWriteType.withoutResponse)
+//            piecesCount += 1
+//        }
+//    }
+    
+    @objc func sendNextDataPiece() {
+        print("TRY TO SEND")
+        guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
+        var testData: Data
+        testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+        self.startingPoint = startingPoint + dataPieceSize
+        CentralBluetoothManager.default.peripheral.writeValue(testData,
+                                                              for: CentralBluetoothManager.default.txCharacteristic,
+                                                              type: CBCharacteristicWriteType.withoutResponse)
+        piecesCount += 1
+        if wholeTestData.count - startingPoint == 0 {
+            testDataTimer.invalidate()
+            startingPoint = 0
+            piecesCount = 0
+            print("DATA SENDED")
         }
     }
     
+    @objc func printTimerCount() {
+        print(testDataTimer.timeInterval)
+    }
     
     @IBAction func startListen(_ sender: UIButton) {
         print("LISTEN PRESSED")
@@ -187,9 +207,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func startTalk(_ sender: UIButton) {
         guard CentralBluetoothManager.default.peripheral != nil else { return }
-        sendData()
-        //        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendData), userInfo: nil, repeats: true)
-        print("SEND DATA")
+        testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
+        RunLoop.current.add(testDataTimer, forMode: .common)
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
