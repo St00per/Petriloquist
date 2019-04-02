@@ -33,11 +33,11 @@ class CentralBluetoothManager: NSObject {
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
-    var peripheral: CBPeripheral! {
-//        didSet {
-//            print("PERIPHERAL IS SET")
-//        }
-    }
+    var peripheral: CBPeripheral! //{
+    //        didSet {
+    //            print("PERIPHERAL IS SET")
+    //        }
+    // }
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
@@ -50,16 +50,16 @@ class CentralBluetoothManager: NSObject {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
         //self.peripherals = centralManager.retrieveConnectedPeripherals(withServices: [])
-//        if self.peripheral != nil {
-//            print(self.peripheral.name)
-//        }
-//        if !self.peripherals.isEmpty {
-//            if self.peripherals[0].name == "Petriloquist Test Device" {
-//            self.peripheral = self.peripherals[0]
-//            self.peripheral.delegate = self
-//            centralManager.connect(self.peripheral)
-//            }
-//        }
+        //        if self.peripheral != nil {
+        //            print(self.peripheral.name)
+        //        }
+        //        if !self.peripherals.isEmpty {
+        //            if self.peripherals[0].name == "Petriloquist Test Device" {
+        //            self.peripheral = self.peripherals[0]
+        //            self.peripheral.delegate = self
+        //            centralManager.connect(self.peripheral)
+        //            }
+        //        }
     }
 }
 
@@ -83,7 +83,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
             if self.peripherals.isEmpty {
                 centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
             }
-         }
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
@@ -92,12 +92,12 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
-            print(self.peripheral)
-            central.stopScan()
-            self.peripheral.delegate = self
-            central.connect(self.peripheral)
+        print(self.peripheral)
+        central.stopScan()
+        self.peripheral.delegate = self
+        central.connect(self.peripheral)
     }
-   
+    
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
         self.peripheral.discoverServices([petriloquistCBUUID])

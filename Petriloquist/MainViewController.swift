@@ -21,7 +21,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var textedVoice: String = ""
-    var testArray: [Float32] = []
+    var testArray: [String] = []
     var wholeTestData = Data()
     var testDataTimer: Timer!
     var peripheralIsConnected = false
@@ -36,7 +36,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
         downloadView.addGestureRecognizer(tapDownload)
         
-        
+        fillTestFloatArray()
         
         managerBluetooth = CentralBluetoothManager.default
         
@@ -87,10 +87,14 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray() {
-        for index in 1...1024 {
-            testArray.append(Float32(index))
+        for _ in 1...100 {
+        var string2000 = ""
+            for _ in 1...512 {
+                string2000 += String(1)
+            }
+            testArray.append(string2000)
         }
-        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+        //wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
     }
     
     @objc fileprivate func sendNextSlice() {
@@ -115,7 +119,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             }
             let bytesWritten = testData.withUnsafeBytes { outputStream.write($0, maxLength: dataPieceSize) }
             print("bytesWritten = \(bytesWritten)")
-  
+            
             
             startingPoint += dataPieceSize
             if startingPoint == dataPieceSize {
@@ -180,13 +184,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @objc func sendData() {
-        let text = "TESTING TRANSFER"
+        
+        //for index in 0..<testArray.count {
+        let text = testArray[0]
+        print(text)
         guard let data = text.data(using: .utf8) else { return }
         CentralBluetoothManager.default.peripheral.writeValue(data,
                                                               for: CentralBluetoothManager.default.txCharacteristic,
                                                               type: CBCharacteristicWriteType.withoutResponse)
+            print(data.count)
+        //}
     }
-
+    
     
     @IBAction func startListen(_ sender: UIButton) {
         print("LISTEN PRESSED")
@@ -200,7 +209,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBAction func startTalk(_ sender: UIButton) {
         guard CentralBluetoothManager.default.peripheral != nil else { return }
         sendData()
-//        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendData), userInfo: nil, repeats: true)
+        //        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendData), userInfo: nil, repeats: true)
         print("SEND DATA")
     }
     
