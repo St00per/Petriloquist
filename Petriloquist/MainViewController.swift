@@ -21,7 +21,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var textedVoice: String = ""
-    var testArray: [String] = []
+    var testArray: [Float32] = []
     var wholeTestData = Data()
     var testDataTimer: Timer!
     var peripheralIsConnected = false
@@ -37,7 +37,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         downloadView.addGestureRecognizer(tapDownload)
         
         fillTestFloatArray()
-        
+        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+        print(wholeTestData.count)
         managerBluetooth = CentralBluetoothManager.default
         
         recordingSession = AVAudioSession.sharedInstance()
@@ -87,14 +88,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray() {
-        for _ in 1...100 {
-        var string2000 = ""
-            for _ in 1...512 {
-                string2000 += String(1)
-            }
-            testArray.append(string2000)
+        for _ in 1...512 {
+            testArray.append(Float32(1))
         }
-        //wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
     }
     
     @objc fileprivate func sendNextSlice() {
@@ -157,43 +153,26 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             // recording failed :(
         }
     }
-    
-    //    func sendVoiceToChannel () {
-    //        guard let ostream = CentralBluetoothManager.default.channel?.outputStream, let voice = "recorded voice", let data = voice.data(using: )  else {
-    //            return
-    //        }
-    //        let bytesWritten =  data.withUnsafeBytes { ostream.write($0, maxLength: data.count) }
-    //    }
-    //
-    func sendVoiceToDevice(recordedVoice: String) {
-        //let peripheral = CentralBluetoothManager.default.foundDevices[0]
-        let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic
-        var transferCharacteristic: CBMutableCharacteristic? = CentralBluetoothManager.default.transferCharacteristic
-        let sendedVoice = "VOICE DATA"
-        //peripheral.writeValue(sendedVoice, for: peripheralCharacteristic, type: CBCharacteristicWriteType.withoutResponse)
-    }
-    
-    func sendTextedVoiceToDevice() {
-        guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
-            return
-        }
-        let text = self.textedVoice
-        let data = text.data(using: .utf8)
-        let bytesWritten =  data?.withUnsafeBytes { ostream.write($0, maxLength: data?.count ?? 0) }
-        
-    }
-    
+ 
+    var startingPoint = 0
+    let dataPieceSize = 128
     @objc func sendData() {
         
-        //for index in 0..<testArray.count {
-        let text = testArray[0]
-        print(text)
-        guard let data = text.data(using: .utf8) else { return }
-        CentralBluetoothManager.default.peripheral.writeValue(data,
-                                                              for: CentralBluetoothManager.default.txCharacteristic,
-                                                              type: CBCharacteristicWriteType.withoutResponse)
-            print(data.count)
-        //}
+        for _ in 0...16  {
+            //            let text = testArray[index]
+            //            guard let data = text.data(using: .utf8) else {
+            //                return
+            //            }
+            //let bytesWritten = data.withUnsafeBytes { outputStream.write($0, maxLength: 512) }
+            //, let outputStream = CentralBluetoothManager.default.channel?.outputStream
+            
+            let testData: Data = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+            self.startingPoint = startingPoint + dataPieceSize
+            CentralBluetoothManager.default.peripheral.writeValue(testData,
+                                                                  for: CentralBluetoothManager.default.txCharacteristic,
+                                                                  type: CBCharacteristicWriteType.withoutResponse)
+            print(startingPoint)
+        }
     }
     
     

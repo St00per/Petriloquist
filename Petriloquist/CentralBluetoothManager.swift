@@ -33,11 +33,7 @@ class CentralBluetoothManager: NSObject {
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
-    var peripheral: CBPeripheral! //{
-    //        didSet {
-    //            print("PERIPHERAL IS SET")
-    //        }
-    // }
+    var peripheral: CBPeripheral! 
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
@@ -49,17 +45,6 @@ class CentralBluetoothManager: NSObject {
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        //self.peripherals = centralManager.retrieveConnectedPeripherals(withServices: [])
-        //        if self.peripheral != nil {
-        //            print(self.peripheral.name)
-        //        }
-        //        if !self.peripherals.isEmpty {
-        //            if self.peripherals[0].name == "Petriloquist Test Device" {
-        //            self.peripheral = self.peripherals[0]
-        //            self.peripheral.delegate = self
-        //            centralManager.connect(self.peripheral)
-        //            }
-        //        }
     }
 }
 
@@ -138,14 +123,19 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
                 print(characteristic)
                 self.txCharacteristic = characteristic
-                //sendData()
+                if let dataValue = self.txCharacteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
+                    print("Opening channel \(psm)")
+                    peripheral.openL2CAPChannel(CBL2CAPPSM(192))
+                } else {
+                    print("Problem decoding PSM")
+                }
             }
             if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
                 self.rxCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
         }
-        print("Max write value: \(peripheral.maximumWriteValueLength(for: .withResponse))")
+        print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
     }
     
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
