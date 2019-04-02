@@ -23,7 +23,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var textedVoice: String = ""
     var testArray: [Float32] = []
     var wholeTestData = Data()
-    var testDataTimer = Timer()
+    var testDataTimer: Timer!
+    
+    var managerBluetooth = CentralBluetoothManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +35,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
         downloadView.addGestureRecognizer(tapDownload)
         
-        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendNextSlice), userInfo: nil, repeats: true)
+        
+        
+        managerBluetooth = CentralBluetoothManager.default
         
         recordingSession = AVAudioSession.sharedInstance()
         do {
@@ -174,7 +178,14 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         
     }
     
-    
+    @objc func sendData() {
+        let text = "TESTING TRANSFER"
+        guard let data = text.data(using: .utf8) else { return }
+        CentralBluetoothManager.default.peripheral.writeValue(data,
+                                                              for: CentralBluetoothManager.default.txCharacteristic,
+                                                              type: CBCharacteristicWriteType.withoutResponse)
+    }
+
     
     @IBAction func startListen(_ sender: UIButton) {
         print("LISTEN PRESSED")
@@ -186,16 +197,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     
     @IBAction func startTalk(_ sender: UIButton) {
-        startRecording()
+        sendData()
+//        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendData), userInfo: nil, repeats: true)
         print("START RECORDING")
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        finishRecording(success: true)
+        //testDataTimer.invalidate()
         print("STOP RECORDING")
     }
     
     @objc func connectToDevice() {
+        CentralBluetoothManager.default.disconnect(peripheral: CentralBluetoothManager.default.peripheral)
         print("Start connecting...")
     }
     

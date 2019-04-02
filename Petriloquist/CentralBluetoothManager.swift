@@ -37,12 +37,20 @@ class CentralBluetoothManager: NSObject {
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
+    var peripherals: [CBPeripheral] = []
+    
     var txCharacteristic: CBCharacteristic!
     var rxCharacteristic: CBCharacteristic!
     
     override init() {
         super.init()
-        centralManager = CBCentralManager(delegate: self, queue: DispatchQueue.main)
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+        self.peripherals = centralManager.retrieveConnectedPeripherals(withServices: [petriloquistCBUUID])
+        if self.peripherals[0].name == "Petriloquist Test Device" {
+            self.peripheral = self.peripherals[0]
+            self.peripheral.delegate = self
+            centralManager.connect(self.peripheral)
+        }
     }
 }
 
@@ -63,7 +71,9 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
             print("central.state is .poweredOff")
         case .poweredOn:
             print("central.state is .poweredOn")
-                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
+            if self.peripherals.isEmpty {
+                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID],options: [CBCentralManagerScanOptionAllowDuplicatesKey:true])
+            }
          }
     }
     
@@ -75,30 +85,26 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
         self.peripheral = peripheral
        
         if self.peripheral.name == "Petriloquist Test Device" {
-            //peripheral.discoverServices(nil)
             print(self.peripheral)
             central.stopScan()
             self.peripheral.delegate = self
             central.connect(self.peripheral)
-            //connect(peripheral: peripheral)
-
         }
     }
-    
+   
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
         self.peripheral.discoverServices([petriloquistCBUUID])
-        //peripheral.openL2CAPChannel(<#T##PSM: CBL2CAPPSM##CBL2CAPPSM#>)
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        print(error?.localizedDescription)
         print("Disconnected!")
     }
     
     func connect(peripheral: CBPeripheral) {
         centralManager.stopScan()
         print ("Scan stopped, try to connect...")
-        // peripheral.delegate = self
         centralManager.connect(peripheral, options: [:])
     }
     
@@ -122,12 +128,12 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         guard let characteristics = service.characteristics else { return }
         
         for characteristic in characteristics {
-            if characteristic.properties.contains(.write) {
+            if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
                 print(characteristic)
                 self.txCharacteristic = characteristic
                 //sendData()
             }
-            if characteristic.properties.contains(.read) {
+            if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
                 self.rxCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
