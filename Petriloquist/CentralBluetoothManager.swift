@@ -33,7 +33,11 @@ class CentralBluetoothManager: NSObject {
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
-    var peripheral: CBPeripheral!
+    var peripheral: CBPeripheral! {
+//        didSet {
+//            print("PERIPHERAL IS SET")
+//        }
+    }
     var isTXPortReady = true
     var delegate: BluetoothManagerConnectDelegate?
     
@@ -45,12 +49,17 @@ class CentralBluetoothManager: NSObject {
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        self.peripherals = centralManager.retrieveConnectedPeripherals(withServices: [petriloquistCBUUID])
-        if self.peripherals[0].name == "Petriloquist Test Device" {
-            self.peripheral = self.peripherals[0]
-            self.peripheral.delegate = self
-            centralManager.connect(self.peripheral)
-        }
+        //self.peripherals = centralManager.retrieveConnectedPeripherals(withServices: [])
+//        if self.peripheral != nil {
+//            print(self.peripheral.name)
+//        }
+//        if !self.peripherals.isEmpty {
+//            if self.peripherals[0].name == "Petriloquist Test Device" {
+//            self.peripheral = self.peripherals[0]
+//            self.peripheral.delegate = self
+//            centralManager.connect(self.peripheral)
+//            }
+//        }
     }
 }
 
@@ -72,7 +81,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
         case .poweredOn:
             print("central.state is .poweredOn")
             if self.peripherals.isEmpty {
-                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID],options: [CBCentralManagerScanOptionAllowDuplicatesKey:true])
+                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
             }
          }
     }
@@ -83,13 +92,10 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
-       
-        if self.peripheral.name == "Petriloquist Test Device" {
             print(self.peripheral)
             central.stopScan()
             self.peripheral.delegate = self
             central.connect(self.peripheral)
-        }
     }
    
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -104,6 +110,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func connect(peripheral: CBPeripheral) {
         centralManager.stopScan()
+        peripheral.delegate = self
         print ("Scan stopped, try to connect...")
         centralManager.connect(peripheral, options: [:])
     }

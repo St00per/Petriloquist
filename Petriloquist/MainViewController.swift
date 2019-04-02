@@ -24,6 +24,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var testArray: [Float32] = []
     var wholeTestData = Data()
     var testDataTimer: Timer!
+    var peripheralIsConnected = false
     
     var managerBluetooth = CentralBluetoothManager()
     
@@ -197,22 +198,37 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     
     @IBAction func startTalk(_ sender: UIButton) {
+        guard CentralBluetoothManager.default.peripheral != nil else { return }
         sendData()
 //        testDataTimer = Timer.scheduledTimer(timeInterval: 0.1, target: self, selector: #selector(sendData), userInfo: nil, repeats: true)
-        print("START RECORDING")
+        print("SEND DATA")
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
         //testDataTimer.invalidate()
-        print("STOP RECORDING")
+        //print("STOP RECORDING")
+        
     }
     
     @objc func connectToDevice() {
-        CentralBluetoothManager.default.disconnect(peripheral: CentralBluetoothManager.default.peripheral)
-        print("Start connecting...")
+        guard let peripheral = CentralBluetoothManager.default.peripheral else {
+            return
+        }
+        if peripheral.state == .connected {
+            CentralBluetoothManager.default.disconnect(peripheral: CentralBluetoothManager.default.peripheral)
+            peripheralIsConnected = false
+            print("DISCONNECTED")
+        } else {
+            CentralBluetoothManager.default.connect(peripheral: CentralBluetoothManager.default.peripheral)
+            peripheralIsConnected = true
+            print("CONNECTED")
+        }
+        
+        //print("Start connecting...")
     }
     
     @objc func downloadVoice() {
-        print("Start downloading...")
+        CentralBluetoothManager.default.centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
+        //print("Start downloading...")
     }
 }
