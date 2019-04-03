@@ -33,6 +33,8 @@ class CentralBluetoothManager: NSObject {
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
     var channel: CBL2CAPChannel?
+    var inputStream: InputStream!
+    var outputStream: OutputStream!
     var peripheral: CBPeripheral!
     var isTXPortReady = true
     
@@ -91,6 +93,10 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
+        guard let channel = channel else {
+            return
+        }
+        
         print("Disconnected!")
     }
     
@@ -149,14 +155,39 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             return
         }
         print("Opened channel \(channel)")
+        //self.channel = channel
+     
+        if let currentChannel = self.channel {
+            if currentChannel != channel
+            {print("cbL2CAPChan will change")}
+            if outputStream != channel.outputStream
+            {print("outPutStream will change")}
+            if inputStream != channel.inputStream
+            {print("inPutStream will change")}
+            outputStream.close()
+            inputStream.close()
+        }
+        
         self.channel = channel
-        channel.inputStream.delegate = self
-        channel.outputStream.delegate = self
-        print("Opened channel \(channel)")
-        channel.inputStream.schedule(in: RunLoop.current, forMode: .default)
-        channel.outputStream.schedule(in: RunLoop.current, forMode: .default)
-        channel.inputStream.open()
-        channel.outputStream.open()
+        outputStream = channel.outputStream
+        outputStream.delegate = self
+        outputStream.schedule(in: .current, forMode: .default)
+        outputStream.open()
+        
+        
+        
+        inputStream = channel.inputStream
+        inputStream.delegate = self
+        inputStream.schedule(in: .current, forMode: .default)
+        inputStream.open()
+        
+//        channel.inputStream.delegate = self
+//        channel.outputStream.delegate = self
+//        print("Opened channel \(channel)")
+//        channel.inputStream.schedule(in: RunLoop.current, forMode: .default)
+//        channel.outputStream.schedule(in: RunLoop.current, forMode: .default)
+//        channel.inputStream.open()
+//        channel.outputStream.open()
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {

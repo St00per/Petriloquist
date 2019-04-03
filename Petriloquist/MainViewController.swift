@@ -77,8 +77,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         ]
         
         do {
-            //audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
-            //audioRecorder = try AVAudioRecorder(
+            
             audioRecorder.delegate = self
             audioRecorder.record()
             
@@ -89,7 +88,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray() {
-        for _ in 1...2016 {
+        for _ in 1...2035 {
             testArray.append(Float32(1))
         }
     }
@@ -156,47 +155,29 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
  
     var startingPoint = 0
-    let dataPieceSize = 128
+    let dataPieceSize = 2035
     var piecesCount = 0
-    //var sendedDataSize
-//    @objc func sendData() {
-//
-//        for _ in 0...(wholeTestData.count/dataPieceSize)  {
-//
-//            var testData: Data
-//            testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-//            self.startingPoint = startingPoint + dataPieceSize
-//
-//            CentralBluetoothManager.default.peripheral.writeValue(testData,
-//                                                                  for: CentralBluetoothManager.default.txCharacteristic,
-//                                                                  type: CBCharacteristicWriteType.withoutResponse)
-//            piecesCount += 1
-//        }
-//    }
     
     @objc func sendNextDataPiece() {
         print("TRY TO SEND")
-        //guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
+        
         var testData: Data
         testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
         self.startingPoint = startingPoint + dataPieceSize
         guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
             return
         }
-        let text = "1"
-        let data = text.data(using: .utf8)
-        var number: UInt8 = 1
+//        let text = "1"
+//        let data = text.data(using: .utf8)
+//        var number: UInt8 = 1
+//
+//        ostream.write( &number, maxLength: 1)
         
-        ostream.write( &number, maxLength: 1)
-        //let bytesWritten =  data?.withUnsafeBytes { ostream.write($0, maxLength: data?.count ?? 0) }
-        //print("bytesWritten = \(bytesWritten)")
-  
-//        guard let outputStream = CentralBluetoothManager.default.channel?.outputStream else { return }
-//        let bytesWritten = testData.withUnsafeBytes { outputStream.write($0, maxLength: 182) }
-//        print(bytesWritten)
-//        CentralBluetoothManager.default.peripheral.writeValue(testData,
-//                                                              for: CentralBluetoothManager.default.txCharacteristic,
-//                                                              type: CBCharacteristicWriteType.withoutResponse)
+        //let msgValue = "L2CAPChannel TEST", data = Data(msgValue.utf8)
+        if ostream.hasSpaceAvailable {
+            _ = testData.withUnsafeBytes {ostream.write($0, maxLength: testData.count)}
+        }
+        
         piecesCount += 1
         if wholeTestData.count - startingPoint == 0 {
             testDataTimer.invalidate()
@@ -223,6 +204,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         guard CentralBluetoothManager.default.peripheral != nil else { return }
         testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
         RunLoop.current.add(testDataTimer, forMode: .common)
+        //sendNextDataPiece()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
