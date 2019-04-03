@@ -21,10 +21,16 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var textedVoice: String = ""
+    
     var testArray: [Float32] = []
     var wholeTestData = Data()
+    var startingPoint = 0
+    var dataPieceSize = 176
+    var piecesCount = 0
+    
     var testDataTimer: Timer!
     var peripheralIsConnected = false
+    
     
     var managerBluetooth = CentralBluetoothManager()
     
@@ -36,7 +42,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
         downloadView.addGestureRecognizer(tapDownload)
         
-        fillTestFloatArray()
+        fillTestFloatArray(forPacketSize: 176)
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         print(wholeTestData.count)
         
@@ -75,20 +81,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
         ]
-        
         do {
-            
             audioRecorder.delegate = self
             audioRecorder.record()
-            
             //recordButton.setTitle("Tap to Stop", for: .normal)
         } catch {
             finishRecording(success: false)
         }
     }
     
-    func fillTestFloatArray() {
-        for _ in 1...22000 {
+    func fillTestFloatArray(forPacketSize size: Int) {
+        self.dataPieceSize = size
+        for _ in 1...(size * 250) {
             testArray.append(Float32(1))
         }
     }
@@ -105,35 +109,46 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
  
-    var startingPoint = 0
-    let dataPieceSize = 176
-    var piecesCount = 0
     
-    @objc func sendNextDataPiece() {
+    
+    func l2CapDataSend() {
         print("TRY TO SEND")
-        //guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
-        var testData: Data
         guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
             return
         }
         if ostream.hasSpaceAvailable {
-            testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-            self.startingPoint = startingPoint + dataPieceSize
-            
-            //        CentralBluetoothManager.default.peripheral.writeValue(testData,
-            //                                                              for: CentralBluetoothManager.default.txCharacteristic,
-            //                                                              type: CBCharacteristicWriteType.withResponse)
-            
-            
-            _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count) }
+           let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+           self.startingPoint = startingPoint + dataPieceSize
+            _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
+        }
+    }
+    
+    func charDataSend(withResponse: Bool) {
+        print("TRY TO SEND")
+        guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
+        let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+        self.startingPoint = startingPoint + dataPieceSize
+        var responseType: CBCharacteristicWriteType
+        if withResponse == true {
+            responseType = .withResponse
+        } else {
+            responseType = .withoutResponse
         }
         
-        piecesCount += 1
+        CentralBluetoothManager.default.peripheral.writeValue(testData,
+                                                              for: CentralBluetoothManager.default.txCharacteristic,
+                                                              type: responseType)
+    }
+    
+    
+    
+    @objc func sendNextDataPiece() {
+        l2CapDataSend()
+        //charDataSend(withResponse: false)
         if wholeTestData.count - startingPoint == 0 {
             testDataTimer.invalidate()
             startingPoint = 0
-            piecesCount = 0
-            print("DATA SENDED")
+            print("DATA SENT")
         }
     }
     

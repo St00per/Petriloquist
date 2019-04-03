@@ -143,7 +143,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             }
         }
         print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
-        
+        print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
     }
  
     func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?) {
