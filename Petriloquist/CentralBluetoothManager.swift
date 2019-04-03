@@ -142,7 +142,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
         }
-        print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
+        print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
         
     }
  

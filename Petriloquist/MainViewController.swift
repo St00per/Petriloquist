@@ -88,60 +88,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray() {
-        for _ in 1...2035 {
+        for _ in 1...22000 {
             testArray.append(Float32(1))
         }
     }
-    
-    @objc fileprivate func sendNextSlice() {
-        if CentralBluetoothManager.default.isTXPortReady {
-            CentralBluetoothManager.default.isTXPortReady = false
-            var startingPoint = 0
-            let dataPieceSize = 128
-            
-            let testData: Data = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-            
-            guard let peripheralCharacteristic = CentralBluetoothManager.default.petriloquistCharacteristic,
-                let peripheral = CentralBluetoothManager.default.peripheral
-                else { return }
-            
-            //transfer data with standart write command
-            peripheral.writeValue(testData,
-                                  for: peripheralCharacteristic,
-                                  type: CBCharacteristicWriteType.withoutResponse)
-            //transfer data with L2CAPChannel
-            guard let outputStream = CentralBluetoothManager.default.channel?.outputStream else {
-                return
-            }
-            let bytesWritten = testData.withUnsafeBytes { outputStream.write($0, maxLength: dataPieceSize) }
-            print("bytesWritten = \(bytesWritten)")
-            
-            
-            startingPoint += dataPieceSize
-            if startingPoint == dataPieceSize {
-                startingPoint = 0
-                testDataTimer.invalidate()
-            }
-        }
-    }
-    
-    
-    
-    func convertBufferPCMDataToFloat() -> [Float] {
-        let bufferCapacity: AVAudioFrameCount = 1024
-        
-        guard let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: 1024, channels: 1, interleaved: false),
-            let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferCapacity) else { return [0]}
-        let bufChannelData = buf.floatChannelData
-        
-        guard let dataValue = bufChannelData?.pointee else { return [0]}
-        let channelDataValueArray = stride(from: 0,
-                                           to: Int(1024),
-                                           by: 1).map{ dataValue[$0] }
-        return channelDataValueArray
-    }
-    
-    
+
     func finishRecording(success: Bool) {
         audioRecorder.stop()
         audioRecorder = nil
@@ -155,27 +106,26 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
  
     var startingPoint = 0
-    let dataPieceSize = 2035
+    let dataPieceSize = 176
     var piecesCount = 0
     
     @objc func sendNextDataPiece() {
         print("TRY TO SEND")
-        
+        //guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
         var testData: Data
-        testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-        self.startingPoint = startingPoint + dataPieceSize
         guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
             return
         }
-//        let text = "1"
-//        let data = text.data(using: .utf8)
-//        var number: UInt8 = 1
-//
-//        ostream.write( &number, maxLength: 1)
-        
-        //let msgValue = "L2CAPChannel TEST", data = Data(msgValue.utf8)
         if ostream.hasSpaceAvailable {
-            _ = testData.withUnsafeBytes {ostream.write($0, maxLength: testData.count)}
+            testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
+            self.startingPoint = startingPoint + dataPieceSize
+            
+            //        CentralBluetoothManager.default.peripheral.writeValue(testData,
+            //                                                              for: CentralBluetoothManager.default.txCharacteristic,
+            //                                                              type: CBCharacteristicWriteType.withResponse)
+            
+            
+            _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count) }
         }
         
         piecesCount += 1
