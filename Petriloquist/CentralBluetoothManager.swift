@@ -35,6 +35,7 @@ class CentralBluetoothManager: NSObject {
     var channel: CBL2CAPChannel?
     var peripheral: CBPeripheral!
     var isTXPortReady = true
+    
     var delegate: BluetoothManagerConnectDelegate?
     
     var peripherals: [CBPeripheral] = []
@@ -127,12 +128,8 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
                 print(characteristic)
                 self.txCharacteristic = characteristic
-                //if let dataValue = self.txCharacteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
-                    print("Opening channel \(192)")
-                    peripheral.openL2CAPChannel(CBL2CAPPSM(192))
-                //} else {
-                    //print("Problem decoding PSM")
-               // }
+                print("Opening channel \(192)")
+                peripheral.openL2CAPChannel(CBL2CAPPSM(192))
             }
             if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
                 self.rxCharacteristic = characteristic
@@ -140,24 +137,9 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             }
         }
         print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        if let error = error {
-            print("Characteristic update error - \(error)")
-            return
-        }
         
-        print("Read characteristic \(characteristic)")
-        
-        if let dataValue = characteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
-            print("Opening channel \(psm)")
-            peripheral.openL2CAPChannel(psm)
-        } else {
-            print("Problem decoding PSM")
-        }
     }
-    
+ 
     func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?) {
         if let error = error {
             print("Error opening l2cap channel - \(error.localizedDescription)")

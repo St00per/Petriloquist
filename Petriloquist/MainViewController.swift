@@ -156,7 +156,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
  
     var startingPoint = 0
-    let dataPieceSize = 182
+    let dataPieceSize = 128
     var piecesCount = 0
     //var sendedDataSize
 //    @objc func sendData() {
@@ -176,13 +176,27 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @objc func sendNextDataPiece() {
         print("TRY TO SEND")
-        guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
+        //guard CentralBluetoothManager.default.peripheral.canSendWriteWithoutResponse else { return }
         var testData: Data
         testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
         self.startingPoint = startingPoint + dataPieceSize
-        CentralBluetoothManager.default.peripheral.writeValue(testData,
-                                                              for: CentralBluetoothManager.default.txCharacteristic,
-                                                              type: CBCharacteristicWriteType.withoutResponse)
+        guard let ostream = CentralBluetoothManager.default.channel?.outputStream else {
+            return
+        }
+        let text = "1"
+        let data = text.data(using: .utf8)
+        var number: UInt8 = 1
+        
+        ostream.write( &number, maxLength: 1)
+        //let bytesWritten =  data?.withUnsafeBytes { ostream.write($0, maxLength: data?.count ?? 0) }
+        //print("bytesWritten = \(bytesWritten)")
+  
+//        guard let outputStream = CentralBluetoothManager.default.channel?.outputStream else { return }
+//        let bytesWritten = testData.withUnsafeBytes { outputStream.write($0, maxLength: 182) }
+//        print(bytesWritten)
+//        CentralBluetoothManager.default.peripheral.writeValue(testData,
+//                                                              for: CentralBluetoothManager.default.txCharacteristic,
+//                                                              type: CBCharacteristicWriteType.withoutResponse)
         piecesCount += 1
         if wholeTestData.count - startingPoint == 0 {
             testDataTimer.invalidate()
