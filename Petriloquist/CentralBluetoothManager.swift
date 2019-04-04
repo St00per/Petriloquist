@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 import CoreBluetooth
 
 let petriloquistCBUUID = CBUUID(string: "6C671877-0E08-4A92-921C-41F6E17A2489")
@@ -28,6 +29,8 @@ enum DeviceConnectionState {
 class CentralBluetoothManager: NSObject {
     
     public static let `default` = CentralBluetoothManager()
+    
+    var viewController: MainViewController?
     
     var centralManager: CBCentralManager!
     var petriloquistCharacteristic: CBCharacteristic!
@@ -88,15 +91,15 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
+        self.viewController?.connectView.alpha = 1
+        self.viewController?.connectView.backgroundColor = UIColor.green
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
-        guard let channel = channel else {
-            return
-        }
-        
+        self.viewController?.connectView.alpha = 0.5
+        self.viewController?.connectView.backgroundColor = UIColor.red
         print("Disconnected!")
     }
     

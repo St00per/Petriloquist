@@ -32,15 +32,17 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var peripheralIsConnected = false
     
     enum sendingType {
-        
+        case l2Cap
+        case withResponse
+        case withoutResponse
     }
-    
+    var selectedSendingType: sendingType = .l2Cap
     var managerBluetooth = CentralBluetoothManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        let tapConnect = UITapGestureRecognizer(target: self, action: #selector(connectToDevice))
-        connectView.addGestureRecognizer(tapConnect)
+        connectView.alpha = 0.5
+        
         
 //        let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
 //        downloadView.addGestureRecognizer(tapDownload)
@@ -50,7 +52,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         print(wholeTestData.count)
         
         managerBluetooth = CentralBluetoothManager.default
-        
+        managerBluetooth.viewController = self
         recordingSession = AVAudioSession.sharedInstance()
         do {
             try recordingSession.setCategory(.playAndRecord, mode: .default)
@@ -145,21 +147,20 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         } else {
             responseType = .withoutResponse
         }
-        
         managerBluetooth.peripheral.writeValue(testData,
-                                                              for: managerBluetooth.txCharacteristic,
-                                                              type: responseType)
+                                               for: managerBluetooth.txCharacteristic,
+                                               type: responseType)
     }
     
     
     
     @objc func sendNextDataPiece() {
-        switch sendingType {
-        case l2Cap:
+        switch selectedSendingType {
+        case .l2Cap:
             l2CapDataSend()
-        case charSendWithResponse:
+        case .withResponse:
             charDataSend(withResponse: true)
-        case charSendWithoutResponse:
+        case .withoutResponse:
             charDataSend(withResponse: false)
         }
         if wholeTestData.count - startingPoint == 0 {
@@ -181,6 +182,13 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         print("Listen released")
     }
     
+    @IBAction func connectDisconnect(_ sender: UIButton) {
+            self.connectToDevice()
+    }
+ 
+    @IBAction func scanPeripherals(_ sender: UIButton) {
+        self.scanForPeripherals()
+    }
     
     @IBAction func startTalk(_ sender: UIButton) {
         guard managerBluetooth.peripheral != nil else { return }
@@ -199,17 +207,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             return
         }
         if peripheral.state == .connected {
+            print("TRY TO DISCONNECT")
             managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
             peripheralIsConnected = false
-            print("DISCONNECTED")
         } else {
+            print("TRY TO CONNECT")
             managerBluetooth.connect(peripheral: managerBluetooth.peripheral)
             peripheralIsConnected = true
-            print("CONNECTED")
+            
         }
     }
     
-    @objc func scanForPeripherals() {
+    func scanForPeripherals() {
         managerBluetooth.centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
         print("Start scan for peripherals...")
     }
