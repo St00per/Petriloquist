@@ -83,6 +83,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
+        self.viewController?.connectView.alpha = 1
         print(self.peripheral)
         central.stopScan()
         self.peripheral.delegate = self
@@ -91,15 +92,13 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
-        self.viewController?.connectView.alpha = 1
-        self.viewController?.connectView.backgroundColor = UIColor.green
+        self.viewController?.connectView.backgroundColor = UIColor(hexString: "67A5A9")
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
-        self.viewController?.connectView.alpha = 0.5
-        self.viewController?.connectView.backgroundColor = UIColor.red
+        self.viewController?.connectView.backgroundColor = UIColor(hexString: "DE6969")
         print("Disconnected!")
     }
     
