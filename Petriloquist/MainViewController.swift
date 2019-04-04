@@ -13,6 +13,8 @@ import CoreBluetooth
 class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBOutlet weak var connectView: UIView!
+    @IBOutlet weak var connectLabel: UILabel!
+    
     @IBOutlet weak var downloadView: UIView!
     
     @IBOutlet weak var listenButton: UIButton!
@@ -25,7 +27,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var testArray: [Float32] = []
     var wholeTestData = Data()
     var startingPoint = 0
-    var dataPieceSize = 176
+    var dataPacketSize = 176
     var piecesCount = 0
     
     var testDataTimer: Timer!
@@ -47,55 +49,16 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
 //        let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
 //        downloadView.addGestureRecognizer(tapDownload)
         
-        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: 176))
+        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         print(wholeTestData.count)
         
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
-        recordingSession = AVAudioSession.sharedInstance()
-        do {
-            try recordingSession.setCategory(.playAndRecord, mode: .default)
-            try recordingSession.setActive(true)
-            recordingSession.requestRecordPermission() { [unowned self] allowed in
-                DispatchQueue.main.async {
-                    if allowed {
-                        //self.loadRecordingUI()
-                    } else {
-                        // failed to record!
-                    }
-                }
-            }
-        } catch {
-            // failed to record!
-        }
-        
-    }
-    
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        return paths[0]
-    }
-    
-    func startRecording() {
-        let audioFilename = getDocumentsDirectory().appendingPathComponent("recording.m4a")
-        
-        let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
-            AVSampleRateKey: 12000,
-            AVNumberOfChannelsKey: 1,
-            AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
-        ]
-        do {
-            audioRecorder.delegate = self
-            audioRecorder.record()
-            //recordButton.setTitle("Tap to Stop", for: .normal)
-        } catch {
-            finishRecording(success: false)
-        }
     }
     
     func calculatedArraySize(packetSize: Int) -> Int {
+        self.dataPacketSize = packetSize
         var calculatedArraySize = 0
         let sizesRatio = 20000/packetSize
         calculatedArraySize = sizesRatio * packetSize
@@ -106,32 +69,20 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray(totalSize: Int) {
-        self.dataPieceSize = totalSize
+        //self.dataPieceSize = totalSize
         for _ in 1...totalSize {
             testArray.append(Float32(1))
         }
     }
 
-    func finishRecording(success: Bool) {
-        audioRecorder.stop()
-        audioRecorder = nil
-        
-        if success {
-            //recordButton.setTitle("Tap to Re-record", for: .normal)
-        } else {
-            //recordButton.setTitle("Tap to Record", for: .normal)
-            // recording failed :(
-        }
-    }
- 
-    func l2CapDataSend() {
+     func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
             return
         }
         if ostream.hasSpaceAvailable {
-           let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-           self.startingPoint = startingPoint + dataPieceSize
+           let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
+           self.startingPoint = startingPoint + dataPacketSize
             _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
         }
     }
@@ -139,8 +90,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     func charDataSend(withResponse: Bool) {
         print("TRY TO SEND")
         guard managerBluetooth.peripheral.canSendWriteWithoutResponse else { return }
-        let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPieceSize)
-        self.startingPoint = startingPoint + dataPieceSize
+        let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
+        self.startingPoint = startingPoint + dataPacketSize
         var responseType: CBCharacteristicWriteType
         if withResponse == true {
             responseType = .withResponse
@@ -151,8 +102,24 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
                                                for: managerBluetooth.txCharacteristic,
                                                type: responseType)
     }
+
+     func sendArrayCount() {
+        var arrayCount = calculatedArraySize(packetSize: dataPacketSize)
+        let packetSizeData = Data(bytes: &arrayCount,
+                             count: MemoryLayout.size(ofValue: arrayCount))
+        managerBluetooth.peripheral.writeValue(packetSizeData,
+                                               for: managerBluetooth.arrayCountCharacteristic,
+                                               type: .withResponse)
+    }
     
-    
+   
+    func sendPacketSize() {
+        let arrayCountData = Data(bytes: &dataPacketSize,
+                                  count: MemoryLayout.size(ofValue: dataPacketSize))
+        managerBluetooth.peripheral.writeValue(arrayCountData,
+                                               for: managerBluetooth.packetSizeCharacteristic,
+                                               type: .withResponse)
+    }
     
     @objc func sendNextDataPiece() {
         switch selectedSendingType {
@@ -167,6 +134,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             testDataTimer.invalidate()
             startingPoint = 0
             print("DATA SENT")
+            talkButton.isUserInteractionEnabled = false
         }
     }
     
@@ -182,24 +150,39 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         print("Listen released")
     }
     
+    @IBAction func l2CapSelect(_ sender: UIButton) {
+        self.selectedSendingType = .l2Cap
+    }
+    
+    @IBAction func withResponseSelect(_ sender: UIButton) {
+        self.selectedSendingType = .withResponse
+    }
+    
+    @IBAction func withoutResponseSelect(_ sender: UIButton) {
+        self.selectedSendingType = .withoutResponse
+    }
+ 
     @IBAction func connectDisconnect(_ sender: UIButton) {
             self.connectToDevice()
     }
  
     @IBAction func scanPeripherals(_ sender: UIButton) {
-        self.scanForPeripherals()
+        managerBluetooth.centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
+        print("Start scan for peripherals...")
     }
     
     @IBAction func startTalk(_ sender: UIButton) {
-        guard managerBluetooth.peripheral != nil else { return }
+        
+        guard managerBluetooth.peripheral.state == .connected else { return }
+        talkButton.isUserInteractionEnabled = false
+        sendPacketSize()
+        sendArrayCount()
         testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
         RunLoop.current.add(testDataTimer, forMode: .common)
-        //sendNextDataPiece()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        //testDataTimer.invalidate()
-        //print("STOP RECORDING")
+        
     }
     
     @objc func connectToDevice() {
@@ -214,14 +197,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             print("TRY TO CONNECT")
             managerBluetooth.connect(peripheral: managerBluetooth.peripheral)
             peripheralIsConnected = true
-            
         }
     }
-    
-    func scanForPeripherals() {
-        managerBluetooth.centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
-        print("Start scan for peripherals...")
-    }
+  
 }
 
 extension UIColor {

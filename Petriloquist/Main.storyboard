@@ -154,6 +154,9 @@
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="K9b-zI-c8s">
                                                         <rect key="frame" x="0.0" y="0.0" width="110" height="60"/>
+                                                        <connections>
+                                                            <action selector="l2CapSelect:" destination="bA5-gp-b9X" eventType="touchUpInside" id="Dbe-h4-t6V"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L2Cap" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tDj-tX-2cU">
                                                         <rect key="frame" x="30" y="19" width="50.5" height="22.5"/>
@@ -181,6 +184,9 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="107" id="7ty-1U-hvk"/>
                                                         </constraints>
+                                                        <connections>
+                                                            <action selector="withResponseSelect:" destination="bA5-gp-b9X" eventType="touchUpInside" id="RnN-1o-DDg"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Response" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Rfw-ee-HLd">
                                                         <rect key="frame" x="17.5" y="19" width="72.5" height="22.5"/>
@@ -207,6 +213,9 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="110" id="OCy-Xl-UWJ"/>
                                                         </constraints>
+                                                        <connections>
+                                                            <action selector="withoutResponseSelect:" destination="bA5-gp-b9X" eventType="touchUpInside" id="DCB-xw-uK3"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="NoResponse" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="x6z-tz-4jx">
                                                         <rect key="frame" x="6.5" y="19" width="97" height="22.5"/>
@@ -255,6 +264,7 @@
                         <viewLayoutGuide key="safeArea" id="9Y7-wZ-Qzt"/>
                     </view>
                     <connections>
+                        <outlet property="connectLabel" destination="2kH-BD-bHi" id="TMa-1a-iOu"/>
                         <outlet property="connectView" destination="BSh-bd-BL7" id="5mH-CP-xQp"/>
                         <outlet property="downloadView" destination="ZPK-sT-LTh" id="sBT-yL-3ow"/>
                         <outlet property="listenButton" destination="f03-Cj-9N9" id="i4X-gS-Xfp"/>

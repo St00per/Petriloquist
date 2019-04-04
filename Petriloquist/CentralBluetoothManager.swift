@@ -47,6 +47,10 @@ class CentralBluetoothManager: NSObject {
     
     var txCharacteristic: CBCharacteristic!
     var rxCharacteristic: CBCharacteristic!
+    var psmCharacteristic: CBCharacteristic!
+    var packetSizeCharacteristic: CBCharacteristic!
+    var arrayCountCharacteristic: CBCharacteristic!
+    var resultStringCharacteristic: CBCharacteristic!
     
     override init() {
         super.init()
@@ -71,9 +75,9 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
             print("central.state is .poweredOff")
         case .poweredOn:
             print("central.state is .poweredOn")
-            if self.peripherals.isEmpty {
-                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
-            }
+//            if self.peripherals.isEmpty {
+//                centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
+//            }
         }
     }
     
@@ -93,12 +97,14 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
         self.viewController?.connectView.backgroundColor = UIColor(hexString: "67A5A9")
+        self.viewController?.connectLabel.text = "DISCONNECT"
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
         self.viewController?.connectView.backgroundColor = UIColor(hexString: "DE6969")
+        self.viewController?.connectLabel.text = "CONNECT"
         print("Disconnected!")
     }
     
@@ -136,18 +142,56 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
                 print(characteristic)
                 self.txCharacteristic = characteristic
-                print("Opening channel \(192)")
-                peripheral.openL2CAPChannel(CBL2CAPPSM(192))
+//                print("Opening channel \(192)")
+//                peripheral.openL2CAPChannel(CBL2CAPPSM(192))
             }
             if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
                 self.rxCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
+            if characteristic.uuid == CBUUID(string: "84e3cbe2-65aa-47b1-9889-ccee3e14824a") {
+                self.psmCharacteristic = characteristic
+                self.peripheral.setNotifyValue(true, for: self.psmCharacteristic)
+            }
+            if characteristic.uuid == CBUUID(string: "ad3fde58-4a98-4ddf-b4f2-1d9423baae80") {
+                self.packetSizeCharacteristic = characteristic
+                self.peripheral.setNotifyValue(true, for: self.packetSizeCharacteristic)
+            }
+            if characteristic.uuid == CBUUID(string: "6016bb95-c904-4b5c-8464-3204941116ca") {
+                self.arrayCountCharacteristic = characteristic
+                self.peripheral.setNotifyValue(true, for: self.arrayCountCharacteristic)
+            }
+            if characteristic.uuid == CBUUID(string: "1689582c-74f2-418b-8314-464d04b00c6d") {
+                self.resultStringCharacteristic = characteristic
+                self.peripheral.setNotifyValue(true, for: self.resultStringCharacteristic)
+            }
+            
         }
         print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
         print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
     }
- 
+    
+    func peripheral(_ peripheral: CBPeripheral,
+                    didUpdateValueFor characteristic: CBCharacteristic,
+                    error: Error?) {
+        print(#function)
+        print("characteristic : \(characteristic) \n\(characteristic.uuid)")
+        if error != nil {
+            print("Error in \(#function) :\n\(error!)")
+            return
+        }
+        
+        print("Read characteristic \(characteristic)")
+        
+        if let dataValue = characteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
+            print("Opening channel \(psm)")
+            self.peripheral.openL2CAPChannel(psm)
+            
+        } else {
+            print("Problem decoding PSM")
+        }
+    }
+    
     func peripheral(_ peripheral: CBPeripheral, didOpen channel: CBL2CAPChannel?, error: Error?) {
         if let error = error {
             print("Error opening l2cap channel - \(error.localizedDescription)")
@@ -182,14 +226,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         inputStream.delegate = self
         inputStream.schedule(in: .current, forMode: .default)
         inputStream.open()
-        
-//        channel.inputStream.delegate = self
-//        channel.outputStream.delegate = self
-//        print("Opened channel \(channel)")
-//        channel.inputStream.schedule(in: RunLoop.current, forMode: .default)
-//        channel.outputStream.schedule(in: RunLoop.current, forMode: .default)
-//        channel.inputStream.open()
-//        channel.outputStream.open()
+ 
     }
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
