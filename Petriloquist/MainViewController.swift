@@ -19,6 +19,19 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBOutlet weak var listenButton: UIButton!
     @IBOutlet weak var talkButton: UIButton!
+    @IBOutlet weak var talkButtonLabel: UILabel!
+    @IBOutlet weak var talkButtonView: UIView!
+    @IBOutlet weak var sendingTypeLabel: UILabel!
+    
+    @IBOutlet weak var listenView: UIView!
+    @IBOutlet weak var headerView: UIView!
+    
+    @IBOutlet weak var speedResultView: UIView!
+    @IBOutlet weak var speedResultsLabel: UILabel!
+    @IBOutlet weak var packetSizeSlider: UISlider!
+    @IBOutlet weak var packetSizeLabel: UILabel!
+    
+    
     
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
@@ -28,6 +41,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var wholeTestData = Data()
     var startingPoint = 0
     var dataPacketSize = 176
+    var maxValueResponse = 0
+    var maxValueNoResponse = 0
     var piecesCount = 0
     
     var testDataTimer: Timer!
@@ -43,15 +58,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        connectView.alpha = 0.5
-        
+        connectView.alpha = 0.3
+        headerView.alpha = 0.3
+        headerView.isUserInteractionEnabled = false
+        listenView.alpha = 0.3
+        talkButtonView.alpha = 0.3
+        talkButtonView.isUserInteractionEnabled = false
+        speedResultView.alpha = 0.3
         
 //        let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
 //        downloadView.addGestureRecognizer(tapDownload)
         
-        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
-        print(wholeTestData.count)
+        
         
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
@@ -62,7 +80,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         var calculatedArraySize = 0
         let sizesRatio = 20000/packetSize
         calculatedArraySize = sizesRatio * packetSize
-        if 20000 - calculatedArraySize > 500 {
+        if calculatedArraySize < 20000 {
             calculatedArraySize = (sizesRatio * packetSize) + packetSize
         }
         return calculatedArraySize
@@ -104,21 +122,25 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
 
      func sendArrayCount() {
-        var arrayCount = calculatedArraySize(packetSize: dataPacketSize)
-        let packetSizeData = Data(bytes: &arrayCount,
-                             count: MemoryLayout.size(ofValue: arrayCount))
-        managerBluetooth.peripheral.writeValue(packetSizeData,
+        var arrayCount = String(calculatedArraySize(packetSize: dataPacketSize))
+        let arrayCountData = Data(arrayCount.utf8)
+        managerBluetooth.peripheral.writeValue(arrayCountData,
                                                for: managerBluetooth.arrayCountCharacteristic,
                                                type: .withResponse)
     }
     
    
     func sendPacketSize() {
-        let arrayCountData = Data(bytes: &dataPacketSize,
-                                  count: MemoryLayout.size(ofValue: dataPacketSize))
-        managerBluetooth.peripheral.writeValue(arrayCountData,
+        var packetSize = String(self.dataPacketSize)
+        let packetSizeData = Data(packetSize.utf8)
+        managerBluetooth.peripheral.writeValue(packetSizeData,
                                                for: managerBluetooth.packetSizeCharacteristic,
                                                type: .withResponse)
+    }
+    
+    func sendingTimerStart() {
+        testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
+        RunLoop.current.add(testDataTimer, forMode: .common)
     }
     
     @objc func sendNextDataPiece() {
@@ -134,7 +156,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             testDataTimer.invalidate()
             startingPoint = 0
             print("DATA SENT")
-            talkButton.isUserInteractionEnabled = false
+            
         }
     }
     
@@ -143,23 +165,38 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func startListen(_ sender: UIButton) {
-        print("LISTEN PRESSED")
+        //print("LISTEN PRESSED")
     }
     
     @IBAction func stopListen(_ sender: UIButton) {
-        print("Listen released")
+       // print("Listen released")
+    }
+    
+    
+    @IBAction func sliderScroll(_ sender: UISlider) {
+        self.dataPacketSize = Int(sender.value)
+        packetSizeLabel.text = String(Int(sender.value))
     }
     
     @IBAction func l2CapSelect(_ sender: UIButton) {
         self.selectedSendingType = .l2Cap
+        sendingTypeLabel.text = "L2Cap"
+        packetSizeSlider.value = 176
+        packetSizeSlider.maximumValue = 2048
     }
     
     @IBAction func withResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withResponse
+        sendingTypeLabel.text = "Response"
+        packetSizeSlider.value = 176
+        packetSizeSlider.maximumValue = Float(maxValueResponse)
     }
     
     @IBAction func withoutResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withoutResponse
+        sendingTypeLabel.text = "NoResponse"
+        packetSizeSlider.value = 176
+        packetSizeSlider.maximumValue = Float(maxValueNoResponse)
     }
  
     @IBAction func connectDisconnect(_ sender: UIButton) {
@@ -174,11 +211,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBAction func startTalk(_ sender: UIButton) {
         
         guard managerBluetooth.peripheral.state == .connected else { return }
+        
         talkButton.isUserInteractionEnabled = false
+        talkButtonLabel.text = "SENDING DATA..."
+        speedResultView.alpha = 0.3
+        speedResultsLabel.text = ""
+        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+        print(wholeTestData.count)
         sendPacketSize()
-        sendArrayCount()
-        testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
-        RunLoop.current.add(testDataTimer, forMode: .common)
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {

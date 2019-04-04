@@ -12,9 +12,14 @@ import CoreBluetooth
 
 let petriloquistCBUUID = CBUUID(string: "6C671877-0E08-4A92-921C-41F6E17A2489")
 let moduleFunctionConfigurationCBUUID = CBUUID(string: "FFE1")
-
 let txCharUUID = CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3")
 let rxCharUUID = CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616")
+// l2CAP
+let psmCharUUID = CBUUID(string: "84e3cbe2-65aa-47b1-9889-ccee3e14824a")
+// Speed test characteristics
+let packetSizeCharUUID = CBUUID(string: "ad3fde58-4a98-4ddf-b4f2-1d9423baae80")
+let arrayCountCharUUID = CBUUID(string: "6016bb95-c904-4b5c-8464-3204941116ca")
+let resultStringCharUUID = CBUUID(string: "1689582c-74f2-418b-8314-464d04b00c6d")
 
 public protocol BluetoothManagerConnectDelegate {
     func connectingStateSet()
@@ -40,7 +45,7 @@ class CentralBluetoothManager: NSObject {
     var outputStream: OutputStream!
     var peripheral: CBPeripheral!
     var isTXPortReady = true
-    
+    var packetCount = 1
     var delegate: BluetoothManagerConnectDelegate?
     
     var peripherals: [CBPeripheral] = []
@@ -91,20 +96,35 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
         print(self.peripheral)
         central.stopScan()
         self.peripheral.delegate = self
-        central.connect(self.peripheral)
+        //central.connect(self.peripheral)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
-        self.viewController?.connectView.backgroundColor = UIColor(hexString: "67A5A9")
+        //self.viewController?.connectView.backgroundColor = UIColor(hexString: "67A5A9")
         self.viewController?.connectLabel.text = "DISCONNECT"
+        self.viewController?.talkButtonView.alpha = 1
+        self.viewController?.talkButtonView.isUserInteractionEnabled = true
+        self.viewController?.headerView.alpha = 1
+        self.viewController?.headerView.isUserInteractionEnabled = true
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
-        self.viewController?.connectView.backgroundColor = UIColor(hexString: "DE6969")
+        //self.viewController?.connectView.backgroundColor = UIColor(hexString: "DE6969")
         self.viewController?.connectLabel.text = "CONNECT"
+        self.viewController?.talkButtonView.alpha = 0.3
+        self.viewController?.talkButtonView.isUserInteractionEnabled = false
+        self.viewController?.headerView.alpha = 0.3
+        self.viewController?.headerView.isUserInteractionEnabled = false
+        self.viewController?.speedResultView.alpha = 0.3
+        self.viewController?.speedResultsLabel.text = ""
+        self.viewController?.talkButtonLabel.text = "SEND DATA"
+        self.viewController?.talkButton.isUserInteractionEnabled = true
+        outputStream.close()
+        inputStream.close()
+        channel = nil
         print("Disconnected!")
     }
     
@@ -139,29 +159,29 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         guard let characteristics = service.characteristics else { return }
         
         for characteristic in characteristics {
-            if characteristic.uuid == CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3") {
+            if characteristic.uuid == txCharUUID {
                 print(characteristic)
                 self.txCharacteristic = characteristic
 //                print("Opening channel \(192)")
 //                peripheral.openL2CAPChannel(CBL2CAPPSM(192))
             }
-            if characteristic.uuid == CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616") {
+            if characteristic.uuid == rxCharUUID {
                 self.rxCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.rxCharacteristic)
             }
-            if characteristic.uuid == CBUUID(string: "84e3cbe2-65aa-47b1-9889-ccee3e14824a") {
+            if characteristic.uuid == psmCharUUID {
                 self.psmCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.psmCharacteristic)
             }
-            if characteristic.uuid == CBUUID(string: "ad3fde58-4a98-4ddf-b4f2-1d9423baae80") {
+            if characteristic.uuid == packetSizeCharUUID {
                 self.packetSizeCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.packetSizeCharacteristic)
             }
-            if characteristic.uuid == CBUUID(string: "6016bb95-c904-4b5c-8464-3204941116ca") {
+            if characteristic.uuid == arrayCountCharUUID {
                 self.arrayCountCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.arrayCountCharacteristic)
             }
-            if characteristic.uuid == CBUUID(string: "1689582c-74f2-418b-8314-464d04b00c6d") {
+            if characteristic.uuid == resultStringCharUUID {
                 self.resultStringCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.resultStringCharacteristic)
             }
@@ -169,6 +189,9 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         }
         print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
         print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
+        self.viewController?.maxValueResponse = peripheral.maximumWriteValueLength(for: .withResponse)
+        self.viewController?.maxValueNoResponse = peripheral.maximumWriteValueLength(for: .withoutResponse)
+        
     }
     
     func peripheral(_ peripheral: CBPeripheral,
@@ -180,15 +203,26 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             print("Error in \(#function) :\n\(error!)")
             return
         }
-        
         print("Read characteristic \(characteristic)")
         
-        if let dataValue = characteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
-            print("Opening channel \(psm)")
-            self.peripheral.openL2CAPChannel(psm)
-            
-        } else {
-            print("Problem decoding PSM")
+        if characteristic.uuid == resultStringCharUUID {
+            guard let resultValue = characteristic.value, let result = String(data: resultValue, encoding: .utf8) else { return }
+            print(result)
+            self.viewController?.speedResultsLabel.text = result
+            self.viewController?.talkButtonLabel.text = "SEND DATA"
+            self.viewController?.talkButton.isUserInteractionEnabled = true
+            self.viewController?.speedResultView.alpha = 1
+            packetCount = 0
+        }
+        
+        if characteristic.uuid == psmCharUUID {
+            if let dataValue = characteristic.value, let string = String(data: dataValue, encoding: .utf8), let psm = UInt16(string) {
+                print("Opening channel \(psm)")
+                self.peripheral.openL2CAPChannel(psm)
+                
+            } else {
+                print("Problem decoding PSM")
+            }
         }
     }
     
@@ -200,21 +234,22 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         guard let channel = channel else {
             return
         }
-        print("Opened channel \(channel)")
+        
         //self.channel = channel
      
-        if let currentChannel = self.channel {
-            if currentChannel != channel
-            {print("cbL2CAPChan will change")}
-            if outputStream != channel.outputStream
-            {print("outPutStream will change")}
-            if inputStream != channel.inputStream
-            {print("inPutStream will change")}
-            outputStream.close()
-            inputStream.close()
-        }
+//        if let currentChannel = self.channel {
+//            if currentChannel != channel
+//            {print("cbL2CAPChan will change")}
+//            if outputStream != channel.outputStream
+//            {print("outPutStream will change")}
+//            if inputStream != channel.inputStream
+//            {print("inPutStream will change")}
+//            outputStream.close()
+//            inputStream.close()
+//        }
         
         self.channel = channel
+        print("Opened channel \(channel)")
         outputStream = channel.outputStream
         outputStream.delegate = self
         outputStream.schedule(in: .current, forMode: .default)
@@ -234,7 +269,18 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             print("Error discovering services: error")
             return
         }
-        print("Message sent")
+        if characteristic.uuid == packetSizeCharUUID {
+           print("Packet size sent")
+            self.viewController?.sendArrayCount()
+        }
+        if characteristic.uuid == arrayCountCharUUID {
+            print("Array size sent")
+            self.viewController?.sendingTimerStart()
+        }
+        if characteristic.uuid == txCharUUID {
+            print("Packet \(packetCount) has been delivered")
+            packetCount += 1
+        }
     }
 }
 
