@@ -15,35 +15,30 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
     @IBOutlet weak var noResponseButtonView: UIView!
-    
-    
     @IBOutlet weak var connectView: UIView!
     @IBOutlet weak var connectLabel: UILabel!
-    
     @IBOutlet weak var downloadView: UIView!
-    
     @IBOutlet weak var listenButton: UIButton!
     @IBOutlet weak var talkButton: UIButton!
     @IBOutlet weak var talkButtonLabel: UILabel!
     @IBOutlet weak var talkButtonView: UIView!
     @IBOutlet weak var sendingTypeLabel: UILabel!
-    
     @IBOutlet weak var listenView: UIView!
     @IBOutlet weak var headerView: UIView!
-    
     @IBOutlet weak var speedResultView: UIView!
     @IBOutlet weak var speedResultsLabel: UILabel!
     @IBOutlet weak var packetSizeSlider: UISlider!
     @IBOutlet weak var packetSizeLabel: UILabel!
     
-    
+    enum sendingType {
+        case l2Cap
+        case withResponse
+        case withoutResponse
+    }
     
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var audioInput: TempiAudioInput!
-    //let engine = AVAudioEngine()
-    //var textedVoice: String = ""
-    
     var testArray: [Float32] = []
     var recSamples: [Float] = []
     var wholeTestData = Data()
@@ -51,18 +46,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var dataPacketSize = 176
     var maxValueResponse = 0
     var maxValueNoResponse = 0
-    var piecesCount = 0
-    
     var testDataTimer: Timer!
-    var peripheralIsConnected = false
-    
-    enum sendingType {
-        case l2Cap
-        case withResponse
-        case withoutResponse
-    }
     var selectedSendingType: sendingType = .l2Cap
-    
     var managerBluetooth = CentralBluetoothManager()
     
     override func viewDidLoad() {
@@ -71,17 +56,13 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         headerView.alpha = 0.3
         headerView.isUserInteractionEnabled = false
         listenView.alpha = 0.3
-//        talkButtonView.alpha = 0.3
-//        talkButtonView.isUserInteractionEnabled = false
+        //        talkButtonView.alpha = 0.3
+        //        talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
-
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
             self.recSamples.append(contentsOf: samples)
-            //print("Callback is called")
         }
-        
         audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
-        
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
     }
@@ -126,9 +107,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         
         return audioUrl
     }
-    
-    
-    
+
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
         var calculatedArraySize = 0
@@ -146,29 +125,29 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             testArray.append(Float32(1))
         }
     }
-
-//    func recordedSamples() {
-//        let input = engine.inputNode
-//        let bus = 0
-//        var samples: UnsafeMutablePointer<Float>?
-//        input.installTap(onBus: bus, bufferSize: 512, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
-//        samples = buffer.floatChannelData?[0]
-//        rec = Data(buffer: UnsafeBufferPointer(start: samples, count: 512))
-//            //audio callback, samples in samples[0]...samples[buffer.frameLength-1]
-//        }
-//        try! engine.start()
-//
-//
-//    }
     
-     func l2CapDataSend() {
+    //    func recordedSamples() {
+    //        let input = engine.inputNode
+    //        let bus = 0
+    //        var samples: UnsafeMutablePointer<Float>?
+    //        input.installTap(onBus: bus, bufferSize: 512, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
+    //        samples = buffer.floatChannelData?[0]
+    //        rec = Data(buffer: UnsafeBufferPointer(start: samples, count: 512))
+    //            //audio callback, samples in samples[0]...samples[buffer.frameLength-1]
+    //        }
+    //        try! engine.start()
+    //
+    //
+    //    }
+    
+    func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
             return
         }
         if ostream.hasSpaceAvailable {
-           let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
-           self.startingPoint = startingPoint + dataPacketSize
+            let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
+            self.startingPoint = startingPoint + dataPacketSize
             _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
         }
     }
@@ -188,15 +167,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
                                                for: managerBluetooth.txCharacteristic,
                                                type: responseType)
     }
-
-     func sendArrayCount() {
+    
+    func sendArrayCount() {
         var arrayCount = String(calculatedArraySize(packetSize: dataPacketSize))
         let arrayCountData = Data(arrayCount.utf8)
         managerBluetooth.peripheral.writeValue(arrayCountData,
                                                for: managerBluetooth.arrayCountCharacteristic,
                                                type: .withResponse)
     }
-  
+    
     func sendPacketSize() {
         var packetSize = String(self.dataPacketSize)
         let packetSizeData = Data(packetSize.utf8)
@@ -206,7 +185,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func sendingTimerStart() {
-        testDataTimer = Timer(timeInterval: 0.001, target: self, selector: #selector(sendNextDataPiece), userInfo: nil, repeats: true)
+        testDataTimer = Timer(timeInterval: 0.001,
+                              target: self,
+                              selector: #selector(sendNextDataPiece),
+                              userInfo: nil,
+                              repeats: true)
         RunLoop.current.add(testDataTimer, forMode: .common)
     }
     
@@ -237,10 +220,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func stopListen(_ sender: UIButton) {
-       // print("Listen released")
+        // print("Listen released")
     }
-    
-    
+ 
     @IBAction func sliderScroll(_ sender: UISlider) {
         self.dataPacketSize = Int(sender.value)
         packetSizeLabel.text = String(Int(sender.value))
@@ -282,12 +264,10 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         noResponseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
     }
  
-    
-    
     @IBAction func connectDisconnect(_ sender: UIButton) {
-            self.connectToDevice()
+        self.connectToDevice()
     }
- 
+    
     @IBAction func scanPeripherals(_ sender: UIButton) {
         managerBluetooth.centralManager.scanForPeripherals(withServices: [petriloquistCBUUID])
         print("Start scan for peripherals...")
@@ -295,17 +275,17 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func startTalk(_ sender: UIButton) {
         print("START RECORDING")
-//        guard managerBluetooth.peripheral.state == .connected else { return }
+        //        guard managerBluetooth.peripheral.state == .connected else { return }
         audioInput.startRecording()
-//        talkButton.isUserInteractionEnabled = false
-//        talkButtonLabel.text = "SENDING DATA..."
-//        speedResultView.alpha = 0.3
-//        speedResultsLabel.text = ""
-//        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+        //        talkButton.isUserInteractionEnabled = false
+        //        talkButtonLabel.text = "SENDING DATA..."
+        //        speedResultView.alpha = 0.3
+        //        speedResultsLabel.text = ""
+        //        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+        //        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         
-//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: recSamples, count: 512))
-//        print(wholeTestData.count)
+        //        wholeTestData = Data(buffer: UnsafeBufferPointer(start: recSamples, count: 512))
+        //        print(wholeTestData.count)
         //sendPacketSize()
     }
     
@@ -322,14 +302,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         if peripheral.state == .connected {
             print("TRY TO DISCONNECT")
             managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
-            peripheralIsConnected = false
         } else {
             print("TRY TO CONNECT")
             managerBluetooth.connect(peripheral: managerBluetooth.peripheral)
-            peripheralIsConnected = true
         }
     }
-  
 }
 
 extension UIColor {
