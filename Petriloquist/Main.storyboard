@@ -185,7 +185,7 @@
                                                                 <nil key="highlightedColor"/>
                                                             </label>
                                                         </subviews>
-                                                        <color key="backgroundColor" red="0.56470588235294117" green="0.85490196078431369" blue="0.89411764705882346" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <color key="backgroundColor" red="0.11372549019607843" green="0.29803921568627451" blue="0.43137254901960786" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="110" id="9vs-Vu-ugu"/>
                                                             <constraint firstItem="K9b-zI-c8s" firstAttribute="leading" secondItem="RI3-4n-Kcl" secondAttribute="leading" id="A1P-O9-lDD"/>
@@ -350,10 +350,13 @@
                         <outlet property="connectView" destination="BSh-bd-BL7" id="5mH-CP-xQp"/>
                         <outlet property="downloadView" destination="ZPK-sT-LTh" id="sBT-yL-3ow"/>
                         <outlet property="headerView" destination="W8c-Ny-F5X" id="szh-Pn-8FU"/>
+                        <outlet property="l2CapButtonView" destination="RI3-4n-Kcl" id="XIk-nD-QjQ"/>
                         <outlet property="listenButton" destination="f03-Cj-9N9" id="i4X-gS-Xfp"/>
                         <outlet property="listenView" destination="gRW-vS-lCL" id="80e-zG-H1w"/>
+                        <outlet property="noResponseButtonView" destination="FDB-0T-nct" id="Jbc-DN-9wh"/>
                         <outlet property="packetSizeLabel" destination="i1a-iI-kJw" id="8mM-S5-L9z"/>
                         <outlet property="packetSizeSlider" destination="g1j-Uc-QWH" id="SNq-6W-HxV"/>
+                        <outlet property="responseButtonView" destination="3TR-gQ-V51" id="bTy-hV-lE8"/>
                         <outlet property="sendingTypeLabel" destination="y6Z-un-MTS" id="0UM-fy-nvK"/>
                         <outlet property="speedResultView" destination="5Dt-ve-6U1" id="Ysw-Y2-S5j"/>
                         <outlet property="speedResultsLabel" destination="gO0-2M-tua" id="qMq-wW-osf"/>

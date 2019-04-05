@@ -12,6 +12,11 @@ import CoreBluetooth
 
 class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
+    @IBOutlet weak var l2CapButtonView: UIView!
+    @IBOutlet weak var responseButtonView: UIView!
+    @IBOutlet weak var noResponseButtonView: UIView!
+    
+    
     @IBOutlet weak var connectView: UIView!
     @IBOutlet weak var connectLabel: UILabel!
     
@@ -54,6 +59,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         case withoutResponse
     }
     var selectedSendingType: sendingType = .l2Cap
+    
     var managerBluetooth = CentralBluetoothManager()
     
     override func viewDidLoad() {
@@ -65,12 +71,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         talkButtonView.alpha = 0.3
         talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
-        
-//        let tapDownload = UITapGestureRecognizer(target: self, action: #selector(downloadVoice))
-//        downloadView.addGestureRecognizer(tapDownload)
-        
-        
-        
+
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
     }
@@ -87,7 +88,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     func fillTestFloatArray(totalSize: Int) {
-        //self.dataPieceSize = totalSize
+        
         for _ in 1...totalSize {
             testArray.append(Float32(1))
         }
@@ -128,8 +129,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
                                                for: managerBluetooth.arrayCountCharacteristic,
                                                type: .withResponse)
     }
-    
-   
+  
     func sendPacketSize() {
         var packetSize = String(self.dataPacketSize)
         let packetSizeData = Data(packetSize.utf8)
@@ -144,6 +144,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @objc func sendNextDataPiece() {
+        
         switch selectedSendingType {
         case .l2Cap:
             l2CapDataSend()
@@ -152,11 +153,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         case .withoutResponse:
             charDataSend(withResponse: false)
         }
-        if wholeTestData.count - startingPoint == 0 {
+        if wholeTestData.count - startingPoint <= 0 {
             testDataTimer.invalidate()
             startingPoint = 0
+            testArray = []
             print("DATA SENT")
-            
         }
     }
     
@@ -178,27 +179,44 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         packetSizeLabel.text = String(Int(sender.value))
     }
     
+    func selectionClear() {
+        l2CapButtonView.backgroundColor = UIColor(hexString: "90DAE4")
+        responseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
+        noResponseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
+    }
+    
     @IBAction func l2CapSelect(_ sender: UIButton) {
         self.selectedSendingType = .l2Cap
         sendingTypeLabel.text = "L2Cap"
         packetSizeSlider.value = 176
+        packetSizeLabel.text = String(176)
         packetSizeSlider.maximumValue = 2048
+        selectionClear()
+        l2CapButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
     }
     
     @IBAction func withResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withResponse
         sendingTypeLabel.text = "Response"
         packetSizeSlider.value = 176
+        packetSizeLabel.text = String(176)
         packetSizeSlider.maximumValue = Float(maxValueResponse)
+        selectionClear()
+        responseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
     }
     
     @IBAction func withoutResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withoutResponse
         sendingTypeLabel.text = "NoResponse"
         packetSizeSlider.value = 176
+        packetSizeLabel.text = String(176)
         packetSizeSlider.maximumValue = Float(maxValueNoResponse)
+        selectionClear()
+        noResponseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
     }
  
+    
+    
     @IBAction func connectDisconnect(_ sender: UIButton) {
             self.connectToDevice()
     }
