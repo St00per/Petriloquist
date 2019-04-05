@@ -40,9 +40,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
-    var textedVoice: String = ""
+    var audioInput: TempiAudioInput!
+    //let engine = AVAudioEngine()
+    //var textedVoice: String = ""
     
     var testArray: [Float32] = []
+    var recSamples: [Float] = []
     var wholeTestData = Data()
     var startingPoint = 0
     var dataPacketSize = 176
@@ -68,13 +71,63 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         headerView.alpha = 0.3
         headerView.isUserInteractionEnabled = false
         listenView.alpha = 0.3
-        talkButtonView.alpha = 0.3
-        talkButtonView.isUserInteractionEnabled = false
+//        talkButtonView.alpha = 0.3
+//        talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
 
+        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
+            self.recSamples.append(contentsOf: samples)
+            //print("Callback is called")
+        }
+        
+        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
+        
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
     }
+    
+    func createFile(from data: [Float], temporary: Bool = false, filename: String = "TestRecord.wav") -> URL? {
+        var urlString: String
+        if temporary {
+            urlString = filename
+            if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString) {
+                try? FileManager.default.removeItem(at: url)
+            }
+        } else {
+            urlString = filename
+        }
+        let recordSettings: [String : Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: 44100,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 32,
+            AVLinearPCMIsFloatKey: true
+            ] as [String : Any]
+        guard
+            let audioUrl = (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString)),
+            let file = try? AVAudioFile(forWriting: audioUrl, settings: recordSettings, commonFormat: AVAudioCommonFormat.pcmFormatFloat32, interleaved: true),
+            let format = AVAudioFormat(settings: recordSettings) else {
+                print("CreateFile error. Returning nil...")
+                return nil
+        }
+        let outputBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(data.count))!
+        for i in 0..<data.count {
+            if let floatChannelDataPointee = outputBuffer.floatChannelData?.pointee {
+                floatChannelDataPointee[i] = data[i]
+            }
+        }
+        outputBuffer.frameLength = AVAudioFrameCount(data.count)
+        
+        do {
+            try file.write(from: outputBuffer)
+        } catch {
+            print("error:", error.localizedDescription)
+        }
+        
+        return audioUrl
+    }
+    
+    
     
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
@@ -94,6 +147,20 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
 
+//    func recordedSamples() {
+//        let input = engine.inputNode
+//        let bus = 0
+//        var samples: UnsafeMutablePointer<Float>?
+//        input.installTap(onBus: bus, bufferSize: 512, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
+//        samples = buffer.floatChannelData?[0]
+//        rec = Data(buffer: UnsafeBufferPointer(start: samples, count: 512))
+//            //audio callback, samples in samples[0]...samples[buffer.frameLength-1]
+//        }
+//        try! engine.start()
+//
+//
+//    }
+    
      func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
@@ -227,21 +294,25 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func startTalk(_ sender: UIButton) {
+        print("START RECORDING")
+//        guard managerBluetooth.peripheral.state == .connected else { return }
+        audioInput.startRecording()
+//        talkButton.isUserInteractionEnabled = false
+//        talkButtonLabel.text = "SENDING DATA..."
+//        speedResultView.alpha = 0.3
+//        speedResultsLabel.text = ""
+//        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         
-        guard managerBluetooth.peripheral.state == .connected else { return }
-        
-        talkButton.isUserInteractionEnabled = false
-        talkButtonLabel.text = "SENDING DATA..."
-        speedResultView.alpha = 0.3
-        speedResultsLabel.text = ""
-        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
-        print(wholeTestData.count)
-        sendPacketSize()
+//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: recSamples, count: 512))
+//        print(wholeTestData.count)
+        //sendPacketSize()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        
+        print("STOP RECORDING")
+        audioInput.stopRecording()
+        createFile(from: recSamples)
     }
     
     @objc func connectToDevice() {
