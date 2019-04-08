@@ -52,6 +52,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //UIpreparation
         connectView.alpha = 0.3
         headerView.alpha = 0.3
         headerView.isUserInteractionEnabled = false
@@ -59,14 +60,19 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         talkButtonView.alpha = 0.3
         talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
+        
+        //Append recording callback
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
             self.recSamples.append(contentsOf: samples)
         }
         audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
+        
+        //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.viewController = self
     }
     
+    //Create file from recorded PCM float data
     func createFile(from data: [Float], temporary: Bool = false, filename: String = "TestRecord.wav") -> URL? {
         var urlString: String
         if temporary {
@@ -107,7 +113,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         
         return audioUrl
     }
-
+    
+    //Selected packet size array size calculation
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
         var calculatedArraySize = 0
@@ -119,13 +126,14 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         return calculatedArraySize
     }
     
+    //Data array init
     func fillTestFloatArray(totalSize: Int) {
-        
         for _ in 1...totalSize {
             testArray.append(Float32(1))
         }
     }
  
+    
     func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
@@ -262,6 +270,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBAction func startTalk(_ sender: UIButton) {
         print("START RECORDING")
         guard managerBluetooth.peripheral.state == .connected else { return }
+        
         //Start mic sound recording
         audioInput.startRecording()
         

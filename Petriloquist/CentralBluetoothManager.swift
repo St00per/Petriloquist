@@ -10,11 +10,12 @@ import Foundation
 import UIKit
 import CoreBluetooth
 
+// service and characteristics IDs
 let petriloquistCBUUID = CBUUID(string: "6C671877-0E08-4A92-921C-41F6E17A2489")
-let moduleFunctionConfigurationCBUUID = CBUUID(string: "FFE1")
 let txCharUUID = CBUUID(string: "49535343-8841-43F4-A8D4-ECBE34729BB3")
 let rxCharUUID = CBUUID(string: "49535343-1E4D-4BD9-BA61-23C647249616")
 let psmCharUUID = CBUUID(string: "84e3cbe2-65aa-47b1-9889-ccee3e14824a")
+//speed test characteristics
 let packetSizeCharUUID = CBUUID(string: "ad3fde58-4a98-4ddf-b4f2-1d9423baae80")
 let arrayCountCharUUID = CBUUID(string: "6016bb95-c904-4b5c-8464-3204941116ca")
 let resultStringCharUUID = CBUUID(string: "1689582c-74f2-418b-8314-464d04b00c6d")

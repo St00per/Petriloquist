@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5761E1225B31120073A6AA /* CircularBuffer.swift */; };
 		0E59893A224DDAC300DD167B /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E598939224DDAC300DD167B /* MainViewController.swift */; };
 		0E59893C224DDB5600DD167B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E59893B224DDB5600DD167B /* Main.storyboard */; };
 		0E670CEF22574071001BD5CA /* TempiAudioInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E670CEE22574071001BD5CA /* TempiAudioInput.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0E5761E1225B31120073A6AA /* CircularBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularBuffer.swift; sourceTree = "<group>"; };
 		0E598939224DDAC300DD167B /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		0E59893B224DDB5600DD167B /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		0E670CEE22574071001BD5CA /* TempiAudioInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiAudioInput.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				0E771DB4224CD1FF0051DE5D /* Assets.xcassets */,
 				0E771DB6224CD1FF0051DE5D /* LaunchScreen.storyboard */,
 				0E771DB9224CD1FF0051DE5D /* Info.plist */,
+				0E5761E1225B31120073A6AA /* CircularBuffer.swift */,
 			);
 			path = Petriloquist;
 			sourceTree = "<group>";
@@ -145,6 +148,7 @@
 				0E670CEF22574071001BD5CA /* TempiAudioInput.swift in Sources */,
 				0E771DAE224CD1FC0051DE5D /* AppDelegate.swift in Sources */,
 				0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */,
+				0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
