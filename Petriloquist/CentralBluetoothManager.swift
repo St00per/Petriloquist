@@ -93,10 +93,6 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
         self.viewController?.connectLabel.text = "DISCONNECT"
-        self.viewController?.talkButtonView.alpha = 1
-        self.viewController?.talkButtonView.isUserInteractionEnabled = true
-        self.viewController?.headerView.alpha = 1
-        self.viewController?.headerView.isUserInteractionEnabled = true
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
@@ -261,6 +257,11 @@ extension CentralBluetoothManager: StreamDelegate {
             print("Bytes are available")
         case Stream.Event.hasSpaceAvailable:
             print("Space is available")
+            //UIupdate
+            self.viewController?.talkButtonView.alpha = 1
+            self.viewController?.talkButtonView.isUserInteractionEnabled = true
+            self.viewController?.headerView.alpha = 1
+            self.viewController?.headerView.isUserInteractionEnabled = true
         case Stream.Event.errorOccurred:
             print("Stream error")
         default:
