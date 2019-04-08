@@ -62,13 +62,13 @@
 			children = (
 				0E670CEE22574071001BD5CA /* TempiAudioInput.swift */,
 				0E598939224DDAC300DD167B /* MainViewController.swift */,
-				0E59893B224DDB5600DD167B /* Main.storyboard */,
+				0E5761E1225B31120073A6AA /* CircularBuffer.swift */,
 				0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */,
+				0E59893B224DDB5600DD167B /* Main.storyboard */,
 				0E771DAD224CD1FC0051DE5D /* AppDelegate.swift */,
 				0E771DB4224CD1FF0051DE5D /* Assets.xcassets */,
 				0E771DB6224CD1FF0051DE5D /* LaunchScreen.storyboard */,
 				0E771DB9224CD1FF0051DE5D /* Info.plist */,
-				0E5761E1225B31120073A6AA /* CircularBuffer.swift */,
 			);
 			path = Petriloquist;
 			sourceTree = "<group>";

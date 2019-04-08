@@ -49,6 +49,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     var testDataTimer: Timer!
     var selectedSendingType: sendingType = .l2Cap
     var managerBluetooth = CentralBluetoothManager()
+    var toneGenerator: ToneGenerator = ToneGenerator()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -61,11 +62,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
         
+        
+        
+        //toneGenerator.setupAudioUnit()
+        
         //Append recording callback
-        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
-            self.recSamples.append(contentsOf: samples)
-        }
-        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
+//        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
+//            self.recSamples.append(contentsOf: samples)
+//        }
+//        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
@@ -114,7 +119,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         return audioUrl
     }
     
-    //Selected packet size array size calculation
+    //Array size calculation for selected packet size
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
         var calculatedArraySize = 0
@@ -272,7 +277,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         guard managerBluetooth.peripheral.state == .connected else { return }
         
         //Start mic sound recording
-        audioInput.startRecording()
+        //audioInput.startRecording()
         
         //UIupdate
         talkButton.isUserInteractionEnabled = false
@@ -287,13 +292,21 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         print(wholeTestData.count)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
-        sendPacketSize()
+        //sendPacketSize()
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print(error)
+        }
+        toneGenerator.start()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
         print("STOP RECORDING")
-        audioInput.stopRecording()
-        createFile(from: recSamples)
+//        audioInput.stopRecording()
+//        createFile(from: recSamples)
+        toneGenerator.stop()
     }
     
     @objc func connectToDevice() {
