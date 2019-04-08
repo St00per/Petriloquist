@@ -56,8 +56,8 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         headerView.alpha = 0.3
         headerView.isUserInteractionEnabled = false
         listenView.alpha = 0.3
-        //        talkButtonView.alpha = 0.3
-        //        talkButtonView.isUserInteractionEnabled = false
+        talkButtonView.alpha = 0.3
+        talkButtonView.isUserInteractionEnabled = false
         speedResultView.alpha = 0.3
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
             self.recSamples.append(contentsOf: samples)
@@ -125,21 +125,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             testArray.append(Float32(1))
         }
     }
-    
-    //    func recordedSamples() {
-    //        let input = engine.inputNode
-    //        let bus = 0
-    //        var samples: UnsafeMutablePointer<Float>?
-    //        input.installTap(onBus: bus, bufferSize: 512, format: input.inputFormat(forBus: bus)) { (buffer, time) -> Void in
-    //        samples = buffer.floatChannelData?[0]
-    //        rec = Data(buffer: UnsafeBufferPointer(start: samples, count: 512))
-    //            //audio callback, samples in samples[0]...samples[buffer.frameLength-1]
-    //        }
-    //        try! engine.start()
-    //
-    //
-    //    }
-    
+ 
     func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
@@ -275,18 +261,24 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func startTalk(_ sender: UIButton) {
         print("START RECORDING")
-        //        guard managerBluetooth.peripheral.state == .connected else { return }
+        guard managerBluetooth.peripheral.state == .connected else { return }
+        //Start mic sound recording
         audioInput.startRecording()
-        //        talkButton.isUserInteractionEnabled = false
-        //        talkButtonLabel.text = "SENDING DATA..."
-        //        speedResultView.alpha = 0.3
-        //        speedResultsLabel.text = ""
-        //        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-        //        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
         
-        //        wholeTestData = Data(buffer: UnsafeBufferPointer(start: recSamples, count: 512))
-        //        print(wholeTestData.count)
-        //sendPacketSize()
+        //UIupdate
+        talkButton.isUserInteractionEnabled = false
+        talkButtonLabel.text = "SENDING DATA..."
+        speedResultView.alpha = 0.3
+        speedResultsLabel.text = ""
+        
+        //Preparation data for sending
+        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+ 
+        print(wholeTestData.count)
+        
+        //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
+        sendPacketSize()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
