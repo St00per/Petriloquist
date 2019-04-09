@@ -15,6 +15,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
     @IBOutlet weak var noResponseButtonView: UIView!
+    @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var connectView: UIView!
     @IBOutlet weak var connectLabel: UILabel!
     @IBOutlet weak var downloadView: UIView!
@@ -36,11 +37,25 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         case withoutResponse
     }
     
+    enum uiState {
+        case firstLoad
+        case afterSearch
+        case afterConnect
+        case afterChannelOpening
+        case afterDisconnect
+        case dataAreSending
+        case dataHasSent
+    }
+    
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     var audioInput: TempiAudioInput!
     var testArray: [Float32] = []
-    var recSamples: [Float] = []
+    var recSamples: [Float] = [] {
+        didSet {
+            //ToneGenerator.pcmArray = recSamples
+        }
+    }
     var wholeTestData = Data()
     var startingPoint = 0
     var dataPacketSize = 176
@@ -54,23 +69,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         //UIpreparation
-        connectView.alpha = 0.3
-        headerView.alpha = 0.3
-        headerView.isUserInteractionEnabled = false
-        listenView.alpha = 0.3
-        talkButtonView.alpha = 0.3
-        talkButtonView.isUserInteractionEnabled = false
-        speedResultView.alpha = 0.3
+        uiUpdate(uiState: .firstLoad)
         
-        
-        
-        //toneGenerator.setupAudioUnit()
-        
+
         //Append recording callback
-//        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
-//            self.recSamples.append(contentsOf: samples)
-//        }
-//        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
+        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
+
+            self.recSamples.append(contentsOf: samples)
+        }
+        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
@@ -280,33 +287,36 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         //audioInput.startRecording()
         
         //UIupdate
-        talkButton.isUserInteractionEnabled = false
-        talkButtonLabel.text = "SENDING DATA..."
-        speedResultView.alpha = 0.3
-        speedResultsLabel.text = ""
+        uiUpdate(uiState: .dataAreSending)
         
         //Preparation data for sending
         fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
- 
+
         print(wholeTestData.count)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
-        //sendPacketSize()
-        do {
-            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print(error)
-        }
-        toneGenerator.start()
+        sendPacketSize()
+//        do {
+//            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+//            try AVAudioSession.sharedInstance().setActive(true)
+//        } catch {
+//            print(error)
+//        }
+//        toneGenerator.start()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
         print("STOP RECORDING")
 //        audioInput.stopRecording()
+//        print(recSamples.count)
 //        createFile(from: recSamples)
-        toneGenerator.stop()
+//        toneGenerator.stop()
+//        do {
+//            try AVAudioSession.sharedInstance().setActive(false)
+//        } catch {
+//            print(error)
+//        }
     }
     
     @objc func connectToDevice() {
@@ -321,6 +331,52 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             managerBluetooth.connect(peripheral: managerBluetooth.peripheral)
         }
     }
+    
+    func uiUpdate(uiState: uiState) {
+        switch uiState {
+        case .firstLoad:
+            connectView.alpha = 0.3
+            headerView.alpha = 0.3
+            headerView.isUserInteractionEnabled = false
+            listenView.alpha = 0.3
+            talkButtonView.alpha = 0.3
+            talkButtonView.isUserInteractionEnabled = false
+            speedResultView.alpha = 0.3
+        case .afterSearch:
+            connectView.alpha = 1
+        case .afterConnect:
+            connectLabel.text = "DISCONNECT"
+            scanView.alpha = 0.3
+            scanView.isUserInteractionEnabled = false
+        case .afterChannelOpening:
+            talkButtonView.alpha = 1
+            talkButtonView.isUserInteractionEnabled = true
+            headerView.alpha = 1
+            headerView.isUserInteractionEnabled = true
+        case .afterDisconnect:
+            scanView.alpha = 1
+            scanView.isUserInteractionEnabled = true
+            connectLabel.text = "CONNECT"
+            talkButtonView.alpha = 0.3
+            talkButtonView.isUserInteractionEnabled = false
+            headerView.alpha = 0.3
+            headerView.isUserInteractionEnabled = false
+            speedResultView.alpha = 0.3
+            speedResultsLabel.text = ""
+            talkButtonLabel.text = "SEND DATA"
+            talkButton.isUserInteractionEnabled = true
+        case .dataAreSending:
+            talkButton.isUserInteractionEnabled = false
+            talkButtonLabel.text = "SENDING DATA..."
+            speedResultView.alpha = 0.3
+            speedResultsLabel.text = ""
+        case .dataHasSent:
+            talkButtonLabel.text = "SEND DATA"
+            talkButton.isUserInteractionEnabled = true
+            speedResultView.alpha = 1
+        }
+    }
+    
 }
 
 extension UIColor {

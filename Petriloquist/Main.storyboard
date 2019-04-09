@@ -357,6 +357,7 @@
                         <outlet property="packetSizeLabel" destination="i1a-iI-kJw" id="8mM-S5-L9z"/>
                         <outlet property="packetSizeSlider" destination="g1j-Uc-QWH" id="SNq-6W-HxV"/>
                         <outlet property="responseButtonView" destination="3TR-gQ-V51" id="bTy-hV-lE8"/>
+                        <outlet property="scanView" destination="ZPK-sT-LTh" id="wS8-2t-c2L"/>
                         <outlet property="sendingTypeLabel" destination="y6Z-un-MTS" id="0UM-fy-nvK"/>
                         <outlet property="speedResultView" destination="5Dt-ve-6U1" id="Ysw-Y2-S5j"/>
                         <outlet property="speedResultsLabel" destination="gO0-2M-tua" id="qMq-wW-osf"/>

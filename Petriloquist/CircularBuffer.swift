@@ -59,33 +59,74 @@ public struct RingBuffer<T> {
 class ToneGenerator {
     
     fileprivate var toneUnit: AudioUnit? = nil
-    static let sampleRate = 16000
+    static let sampleRate = 44100
     static let amplitude: Float = 1.0
     static let frequency: Float = 440
+    let path = Bundle.main.path(forResource: "TestRecord", ofType: "wav")
+    static var shift: Int = 0
+    static var pcmArray: [Float] = [] {
+        didSet {
+            //print(pcmArray.count)
+        }
+    }
     
     /// Theta is changed over time as each sample is provided.
     static var theta: Float = 0.0
  
     private let renderCallback: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
         
-        print("CALLBACK IS CALLED")
+        
         guard let abl = UnsafeMutableAudioBufferListPointer(ioData) else { return 0 }
         let buffer = abl[0]
         let pointer: UnsafeMutableBufferPointer<Float32> = UnsafeMutableBufferPointer(buffer)
-        for frame in 0..<inNumberFrames {
-            let pointerIndex = pointer.startIndex.advanced(by: Int(frame))
-            pointer[pointerIndex] = sin(theta) * amplitude
-            theta += 2.0 * Float(M_PI) * frequency / Float(sampleRate)
+        shift += Int(inNumberFrames)
+        print(shift)
+        for index in 0..<inNumberFrames {
+            let pointerIndex = pointer.startIndex.advanced(by: Int(index))
+            pointer[pointerIndex] = pcmArray[Int(index + UInt32(shift))]
+                //sin(theta) * amplitude
+            //theta += 2.0 * Float(M_PI) * frequency / Float(sampleRate)
         }
+        
         return noErr
     }
     
     init() {
         setupAudioUnit()
+        let trackURL = URL(fileURLWithPath: path ?? "")
+        ToneGenerator.pcmArray = readFile(url: trackURL)
     }
     
     deinit {
         stop()
+    }
+    
+    func readFile(url: URL) -> [Float] {
+        guard
+            let file = try? AVAudioFile(forReading: url),
+            let format = AVAudioFormat(commonFormat: .pcmFormatFloat32, sampleRate: file.fileFormat.sampleRate, channels: 1, interleaved: false) else {
+                print("Error in readFile! returning empty array...")
+                return []
+        }
+        let bufferCapacity: AVAudioFrameCount = 1024
+        var readed: AVAudioFrameCount = bufferCapacity
+        var array = [Float]()
+        while readed == bufferCapacity {
+            if let buf = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: bufferCapacity) {
+                do {
+                    try file.read(into: buf)
+                } catch {
+                    print(url.lastPathComponent)
+                    print("Error: (error.localizedDescription)")
+                }
+                readed = buf.frameLength
+                // this makes a copy, you might not want that
+                if let bufChannelData = buf.floatChannelData {
+                    array.append(contentsOf: Array(UnsafeBufferPointer(start: bufChannelData[0], count:Int(readed))))
+                }
+            }
+        }
+        return array
     }
     
     func setupAudioUnit() {
@@ -126,11 +167,11 @@ class ToneGenerator {
                                                        mFormatID: kAudioFormatLinearPCM,
                                                        mFormatFlags: kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved,
                                                        mBytesPerPacket: 4 /*four bytes per float*/,
-            mFramesPerPacket: 1,
-            mBytesPerFrame: 4,
-            mChannelsPerFrame: 1,
-            mBitsPerChannel: 4*8,
-            mReserved: 0)
+                                                       mFramesPerPacket: 1,
+                                                       mBytesPerFrame: 4,
+                                                       mChannelsPerFrame: 1,
+                                                       mBitsPerChannel: 4*8,
+                                                       mReserved: 0)
         err = AudioUnitSetProperty(toneUnit!,
                                    kAudioUnitProperty_StreamFormat,
                                    kAudioUnitScope_Input,
@@ -145,6 +186,7 @@ class ToneGenerator {
         var status: OSStatus
         status = AudioUnitInitialize(toneUnit!)
         status = AudioOutputUnitStart(toneUnit!)
+        
         assert(status == noErr)
         
     }

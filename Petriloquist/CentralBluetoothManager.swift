@@ -24,12 +24,6 @@ public protocol BluetoothManagerConnectDelegate {
     func connectingStateSet()
 }
 
-enum DeviceConnectionState {
-    case disconnected
-    case connecting
-    case connected
-}
-
 class CentralBluetoothManager: NSObject {
     
     public static let `default` = CentralBluetoothManager()
@@ -85,7 +79,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
-        self.viewController?.connectView.alpha = 1
+        self.viewController?.uiUpdate(uiState: .afterSearch)
         print(self.peripheral)
         central.stopScan()
         self.peripheral.delegate = self
@@ -93,21 +87,13 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
-        self.viewController?.connectLabel.text = "DISCONNECT"
+        self.viewController?.uiUpdate(uiState: .afterConnect)
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
-        self.viewController?.connectLabel.text = "CONNECT"
-        self.viewController?.talkButtonView.alpha = 0.3
-        self.viewController?.talkButtonView.isUserInteractionEnabled = false
-        self.viewController?.headerView.alpha = 0.3
-        self.viewController?.headerView.isUserInteractionEnabled = false
-        self.viewController?.speedResultView.alpha = 0.3
-        self.viewController?.speedResultsLabel.text = ""
-        self.viewController?.talkButtonLabel.text = "SEND DATA"
-        self.viewController?.talkButton.isUserInteractionEnabled = true
+        self.viewController?.uiUpdate(uiState: .afterDisconnect)
         outputStream.close()
         inputStream.close()
         channel = nil
@@ -188,9 +174,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             guard let resultValue = characteristic.value, let result = String(data: resultValue, encoding: .utf8) else { return }
             print(result)
             self.viewController?.speedResultsLabel.text = result
-            self.viewController?.talkButtonLabel.text = "SEND DATA"
-            self.viewController?.talkButton.isUserInteractionEnabled = true
-            self.viewController?.speedResultView.alpha = 1
+            self.viewController?.uiUpdate(uiState: .dataHasSent)
             packetCount = 0
         }
         
@@ -259,10 +243,7 @@ extension CentralBluetoothManager: StreamDelegate {
         case Stream.Event.hasSpaceAvailable:
             print("Space is available")
             //UIupdate
-            self.viewController?.talkButtonView.alpha = 1
-            self.viewController?.talkButtonView.isUserInteractionEnabled = true
-            self.viewController?.headerView.alpha = 1
-            self.viewController?.headerView.isUserInteractionEnabled = true
+            self.viewController?.uiUpdate(uiState: .afterChannelOpening)
         case Stream.Event.errorOccurred:
             print("Stream error")
         default:
