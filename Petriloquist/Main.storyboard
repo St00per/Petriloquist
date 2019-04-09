@@ -118,16 +118,22 @@
                                                 <rect key="frame" x="0.0" y="262" width="355" height="130"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SEND DATA" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LCl-UL-Q4o">
-                                                        <rect key="frame" x="79.5" y="42.5" width="196" height="45.5"/>
+                                                        <rect key="frame" x="79.5" y="30" width="196" height="45.5"/>
                                                         <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="35"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L2Cap" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y6Z-un-MTS">
-                                                        <rect key="frame" x="152.5" y="77.5" width="50.5" height="25"/>
+                                                        <rect key="frame" x="152.5" y="65" width="50.5" height="25"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="25" id="cON-Uf-i6J"/>
                                                         </constraints>
+                                                        <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
+                                                        <nil key="textColor"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Total Data Value:" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="fvw-aQ-c0L">
+                                                        <rect key="frame" x="110.5" y="92.5" width="134" height="22.5"/>
                                                         <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="17"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
@@ -150,9 +156,11 @@
                                                     <constraint firstItem="UKs-co-Fvn" firstAttribute="top" secondItem="Rpl-fF-l5T" secondAttribute="top" id="H0X-78-hJs"/>
                                                     <constraint firstItem="y6Z-un-MTS" firstAttribute="centerX" secondItem="Rpl-fF-l5T" secondAttribute="centerX" id="MqA-HX-pTg"/>
                                                     <constraint firstAttribute="trailing" secondItem="UKs-co-Fvn" secondAttribute="trailing" id="X3Z-xJ-ufO"/>
-                                                    <constraint firstItem="LCl-UL-Q4o" firstAttribute="centerY" secondItem="Rpl-fF-l5T" secondAttribute="centerY" id="XSe-GQ-SwA"/>
+                                                    <constraint firstItem="fvw-aQ-c0L" firstAttribute="centerX" secondItem="Rpl-fF-l5T" secondAttribute="centerX" id="gpR-Fy-lMy"/>
                                                     <constraint firstAttribute="height" constant="130" id="p9F-5V-InE"/>
                                                     <constraint firstAttribute="bottom" secondItem="UKs-co-Fvn" secondAttribute="bottom" id="qAU-lj-Vfi"/>
+                                                    <constraint firstItem="y6Z-un-MTS" firstAttribute="top" secondItem="fvw-aQ-c0L" secondAttribute="bottom" constant="-50" id="twh-2D-TEe"/>
+                                                    <constraint firstItem="LCl-UL-Q4o" firstAttribute="top" secondItem="Rpl-fF-l5T" secondAttribute="top" constant="30" id="uwr-vD-12u"/>
                                                 </constraints>
                                             </view>
                                         </subviews>
@@ -364,6 +372,7 @@
                         <outlet property="talkButton" destination="UKs-co-Fvn" id="9zR-3w-IkT"/>
                         <outlet property="talkButtonLabel" destination="LCl-UL-Q4o" id="cqb-YK-SW4"/>
                         <outlet property="talkButtonView" destination="Rpl-fF-l5T" id="Nod-lN-ipG"/>
+                        <outlet property="totalDataLabel" destination="fvw-aQ-c0L" id="KZZ-UF-Npi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="W4d-DU-XDl" userLabel="First Responder" sceneMemberID="firstResponder"/>

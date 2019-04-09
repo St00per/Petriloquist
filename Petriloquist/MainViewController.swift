@@ -24,6 +24,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     @IBOutlet weak var talkButtonLabel: UILabel!
     @IBOutlet weak var talkButtonView: UIView!
     @IBOutlet weak var sendingTypeLabel: UILabel!
+    @IBOutlet weak var totalDataLabel: UILabel!
     @IBOutlet weak var listenView: UIView!
     @IBOutlet weak var headerView: UIView!
     @IBOutlet weak var speedResultView: UIView!
@@ -231,7 +232,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
  
     @IBAction func sliderScroll(_ sender: UISlider) {
         self.dataPacketSize = Int(sender.value)
-        packetSizeLabel.text = String(Int(sender.value))
+        packetSizeLabel.text = "\(String(Int(sender.value))) bytes"
     }
     
     func selectionClear() {
@@ -242,32 +243,17 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func l2CapSelect(_ sender: UIButton) {
         self.selectedSendingType = .l2Cap
-        sendingTypeLabel.text = "L2Cap"
-        packetSizeSlider.value = 176
-        packetSizeLabel.text = String(176)
-        packetSizeSlider.maximumValue = 2048
-        selectionClear()
-        l2CapButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        sendingTypeSelectionUpdate(sendingType: .l2Cap)
     }
     
     @IBAction func withResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withResponse
-        sendingTypeLabel.text = "Response"
-        packetSizeSlider.value = 176
-        packetSizeLabel.text = String(176)
-        packetSizeSlider.maximumValue = Float(maxValueResponse)
-        selectionClear()
-        responseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        sendingTypeSelectionUpdate(sendingType: .withResponse)
     }
     
     @IBAction func withoutResponseSelect(_ sender: UIButton) {
         self.selectedSendingType = .withoutResponse
-        sendingTypeLabel.text = "NoResponse"
-        packetSizeSlider.value = 176
-        packetSizeLabel.text = String(176)
-        packetSizeSlider.maximumValue = Float(maxValueNoResponse)
-        selectionClear()
-        noResponseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        sendingTypeSelectionUpdate(sendingType: .withoutResponse)
     }
  
     @IBAction func connectDisconnect(_ sender: UIButton) {
@@ -283,20 +269,21 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         print("START RECORDING")
         guard managerBluetooth.peripheral.state == .connected else { return }
         
-        //Start mic sound recording
+        //Start mic recording
         //audioInput.startRecording()
-        
-        //UIupdate
-        uiUpdate(uiState: .dataAreSending)
         
         //Preparation data for sending
         fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
-
         print(wholeTestData.count)
+        
+        //UIupdate
+        uiUpdate(uiState: .dataAreSending)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
         sendPacketSize()
+        
+        //AudioUnit implemented playback
 //        do {
 //            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
 //            try AVAudioSession.sharedInstance().setActive(true)
@@ -332,12 +319,40 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         }
     }
     
+    func sendingTypeSelectionUpdate(sendingType: sendingType) {
+        switch sendingType {
+            
+        case .l2Cap:
+            sendingTypeLabel.text = "L2Cap"
+            packetSizeSlider.value = 176
+            packetSizeLabel.text = "\(String(176)) bytes"
+            packetSizeSlider.maximumValue = 2048
+            selectionClear()
+            l2CapButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        case .withResponse:
+            sendingTypeLabel.text = "Response"
+            packetSizeSlider.value = 176
+            packetSizeLabel.text = "\(String(176)) bytes"
+            packetSizeSlider.maximumValue = Float(maxValueResponse)
+            selectionClear()
+            responseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        case .withoutResponse:
+            sendingTypeLabel.text = "NoResponse"
+            packetSizeSlider.value = 176
+            packetSizeLabel.text = "\(String(176)) bytes"
+            packetSizeSlider.maximumValue = Float(maxValueNoResponse)
+            selectionClear()
+            noResponseButtonView.backgroundColor = UIColor(hexString: "1D4C6E")
+        }
+    }
+    
     func uiUpdate(uiState: uiState) {
         switch uiState {
         case .firstLoad:
             connectView.alpha = 0.3
             headerView.alpha = 0.3
             headerView.isUserInteractionEnabled = false
+            packetSizeLabel.text = "\(String(176)) bytes"
             listenView.alpha = 0.3
             talkButtonView.alpha = 0.3
             talkButtonView.isUserInteractionEnabled = false
@@ -368,6 +383,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         case .dataAreSending:
             talkButton.isUserInteractionEnabled = false
             talkButtonLabel.text = "SENDING DATA..."
+            totalDataLabel.text = "TotalDataValue: \(wholeTestData.count) bytes, \(wholeTestData.count/dataPacketSize) packets"
             speedResultView.alpha = 0.3
             speedResultsLabel.text = ""
         case .dataHasSent:
