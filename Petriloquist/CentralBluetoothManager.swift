@@ -212,7 +212,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
     
     func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil else {
-            print("Error discovering services: error")
+            print("Write error")
             return
         }
         if characteristic.uuid == packetSizeCharUUID {

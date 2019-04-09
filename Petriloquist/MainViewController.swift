@@ -77,8 +77,10 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
 
             self.recSamples.append(contentsOf: samples)
+            self.wholeTestData = Data(buffer: UnsafeBufferPointer(start: &self.recSamples, count: self.recSamples.count))
+            print(self.recSamples.count)
         }
-        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 44100, numberOfChannels: 1)
+        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 16000, numberOfChannels: 1)
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
@@ -153,9 +155,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             return
         }
         if ostream.hasSpaceAvailable {
+            if startingPoint + dataPacketSize < wholeTestData.count {
             let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
-            self.startingPoint = startingPoint + dataPacketSize
-            _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
+                _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
+                self.startingPoint = startingPoint + dataPacketSize
+            }
+            
         }
     }
     
@@ -173,6 +178,14 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         managerBluetooth.peripheral.writeValue(testData,
                                                for: managerBluetooth.txCharacteristic,
                                                type: responseType)
+    }
+    
+    func sendTotalRecordedDataCount() {
+        var arrayCount = String(recSamples.count)
+        let arrayCountData = Data(arrayCount.utf8)
+        managerBluetooth.peripheral.writeValue(arrayCountData,
+                                               for: managerBluetooth.arrayCountCharacteristic,
+                                               type: .withResponse)
     }
     
     func sendArrayCount() {
@@ -270,12 +283,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         guard managerBluetooth.peripheral.state == .connected else { return }
         
         //Start mic recording
-        //audioInput.startRecording()
+        audioInput.startRecording()
         
         //Preparation data for sending
-        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
-        print(wholeTestData.count)
+//        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+//        print(wholeTestData.count)
         
         //UIupdate
         uiUpdate(uiState: .dataAreSending)
@@ -295,9 +308,18 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     @IBAction func stopTalk(_ sender: UIButton) {
         print("STOP RECORDING")
-//        audioInput.stopRecording()
+        //Record and send testing
+        audioInput.stopRecording()
+        testDataTimer.invalidate()
+        uiUpdate(uiState: .dataHasSent)
+        startingPoint = 0
+        recSamples = []
+        //sendTotalRecordedDataCount()
 //        print(recSamples.count)
 //        createFile(from: recSamples)
+        
+        
+        //toneGenerator testing
 //        toneGenerator.stop()
 //        do {
 //            try AVAudioSession.sharedInstance().setActive(false)
@@ -392,7 +414,6 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             speedResultView.alpha = 1
         }
     }
-    
 }
 
 extension UIColor {
