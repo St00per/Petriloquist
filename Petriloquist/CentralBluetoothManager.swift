@@ -217,11 +217,15 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         }
         if characteristic.uuid == packetSizeCharUUID {
            print("Packet size sent")
-            self.viewController?.sendArrayCount()
+            self.viewController?.sendingTimerStart()
+            //self.viewController?.sendArrayCount()
         }
         if characteristic.uuid == arrayCountCharUUID {
-            print("Array size sent")
-            self.viewController?.sendingTimerStart()
+            print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
+            self.viewController?.startingPoint = 0
+            self.viewController?.recSamples = []
+            //print("Array size sent")
+            //self.viewController?.sendingTimerStart()
         }
         if characteristic.uuid == txCharUUID {
             print("Packet \(packetCount) has been delivered")

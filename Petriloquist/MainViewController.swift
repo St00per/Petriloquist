@@ -80,7 +80,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             self.wholeTestData = Data(buffer: UnsafeBufferPointer(start: &self.recSamples, count: self.recSamples.count))
             print(self.recSamples.count)
         }
-        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 16000, numberOfChannels: 1)
+        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 4000, numberOfChannels: 1)
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
@@ -312,9 +312,9 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         audioInput.stopRecording()
         testDataTimer.invalidate()
         uiUpdate(uiState: .dataHasSent)
-        startingPoint = 0
-        recSamples = []
-        //sendTotalRecordedDataCount()
+        sendTotalRecordedDataCount()
+//        startingPoint = 0
+//        recSamples = []
 //        print(recSamples.count)
 //        createFile(from: recSamples)
         
