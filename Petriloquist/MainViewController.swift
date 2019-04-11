@@ -11,7 +11,19 @@ import AVFoundation
 import AudioToolbox
 import CoreBluetooth
 
-class MainViewController: UIViewController, AVAudioRecorderDelegate {
+public enum uiState {
+    case firstLoad
+    case afterSearch
+    case afterConnect
+    case afterChannelOpening
+    case afterDisconnect
+    case dataAreSending
+    case dataHasSent
+}
+
+class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothManagerUIDelegate {
+    
+    
     
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
@@ -39,15 +51,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         case withoutResponse
     }
     
-    enum uiState {
-        case firstLoad
-        case afterSearch
-        case afterConnect
-        case afterChannelOpening
-        case afterDisconnect
-        case dataAreSending
-        case dataHasSent
-    }
+    
     
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
@@ -86,7 +90,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
-        managerBluetooth.viewController = self
+        //managerBluetooth.viewController = self
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        managerBluetooth.uiDelegate = self
     }
     
     //Create file from recorded PCM float data
@@ -314,6 +322,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         guard let desVC = mainStoryboard.instantiateViewController(withIdentifier: "TalkModeViewController") as? TalkModeViewController else {
             return
         }
+        //managerBluetooth.uiDelegate = desVC
         show(desVC, sender: nil)
     }
     

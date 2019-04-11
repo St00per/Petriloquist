@@ -9,8 +9,8 @@
 import UIKit
 import CoreBluetooth
 
-class TalkModeViewController: UIViewController {
-
+class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
+   
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
     @IBOutlet weak var noResponseButtonView: UIView!
@@ -37,15 +37,7 @@ class TalkModeViewController: UIViewController {
         case withoutResponse
     }
     
-    enum uiState {
-        case firstLoad
-        case afterSearch
-        case afterConnect
-        case afterChannelOpening
-        case afterDisconnect
-        case dataAreSending
-        case dataHasSent
-    }
+    
     
     var audioInput: TempiAudioInput!
     var recSamples: [Float] = []
@@ -73,6 +65,10 @@ class TalkModeViewController: UIViewController {
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
         managerBluetooth.talkModeViewController = self
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        managerBluetooth.uiDelegate = self
     }
     
     func calculatedArraySize(packetSize: Int) -> Int {
@@ -171,6 +167,7 @@ class TalkModeViewController: UIViewController {
     }
     
     func close() {
+        managerBluetooth.uiDelegate = nil
         self.dismiss(animated: true, completion: nil)
     }
     

@@ -24,13 +24,24 @@ public protocol BluetoothManagerConnectDelegate {
     func connectingStateSet()
 }
 
+protocol BluetoothManagerUIDelegate {
+    var maxValueResponse: Int { get set }
+    var maxValueNoResponse: Int { get set }
+    var startingPoint: Int { get set }
+    //var speedResultsLabel: UILabel { get set }
+    var recSamples: [Float] { get set }
+    func uiUpdate(uiState: uiState)
+    func sendingTimerStart()
+}
+
 class CentralBluetoothManager: NSObject {
     
     public static let `default` = CentralBluetoothManager()
     
-    var viewController: MainViewController?
+    //var viewController: MainViewController?
+    var uiDelegate: BluetoothManagerUIDelegate?
     var talkModeViewController: TalkModeViewController?
-    var delegate: BluetoothManagerConnectDelegate?
+    var connectDelegate: BluetoothManagerConnectDelegate?
     var centralManager: CBCentralManager!
     var peripheral: CBPeripheral!
     var peripherals: [CBPeripheral] = []
@@ -80,7 +91,7 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
-        self.viewController?.uiUpdate(uiState: .afterSearch)
+        self.uiDelegate?.uiUpdate(uiState: .afterSearch)
         print(self.peripheral)
         central.stopScan()
         self.peripheral.delegate = self
@@ -88,13 +99,13 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
-        self.viewController?.uiUpdate(uiState: .afterConnect)
+        self.uiDelegate?.uiUpdate(uiState: .afterConnect)
         self.peripheral.discoverServices([petriloquistCBUUID])
     }
     
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
         print(error?.localizedDescription)
-        self.viewController?.uiUpdate(uiState: .afterDisconnect)
+        self.uiDelegate?.uiUpdate(uiState: .afterDisconnect)
         outputStream.close()
         inputStream.close()
         channel = nil
@@ -159,8 +170,8 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         }
         print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
         print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
-        self.viewController?.maxValueResponse = peripheral.maximumWriteValueLength(for: .withResponse)
-        self.viewController?.maxValueNoResponse = peripheral.maximumWriteValueLength(for: .withoutResponse)
+        self.uiDelegate?.maxValueResponse = peripheral.maximumWriteValueLength(for: .withResponse)
+        self.uiDelegate?.maxValueNoResponse = peripheral.maximumWriteValueLength(for: .withoutResponse)
     }
     
     func peripheral(_ peripheral: CBPeripheral,
@@ -174,8 +185,10 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         if characteristic.uuid == resultStringCharUUID {
             guard let resultValue = characteristic.value, let result = String(data: resultValue, encoding: .utf8) else { return }
             print(result)
-            self.viewController?.speedResultsLabel.text = result
-            self.viewController?.uiUpdate(uiState: .dataHasSent)
+            if ((uiDelegate as? MainViewController) != nil) {
+                //self.uiDelegate?.speedResultsLabel.text = result
+            }
+            self.uiDelegate?.uiUpdate(uiState: .dataHasSent)
             packetCount = 0
         }
         
@@ -218,15 +231,16 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         }
         if characteristic.uuid == packetSizeCharUUID {
            print("Packet size sent")
-            self.viewController?.sendingTimerStart()
+            self.uiDelegate?.sendingTimerStart()
             //self.viewController?.sendArrayCount()
         }
         if characteristic.uuid == arrayCountCharUUID {
-            print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
-            self.viewController?.startingPoint = 0
-            self.viewController?.recSamples = []
-            //print("Array size sent")
-            //self.viewController?.sendingTimerStart()
+            //print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
+            self.uiDelegate?.startingPoint = 0
+            if ((uiDelegate as? TalkModeViewController) != nil) {
+                self.uiDelegate?.recSamples = []
+
+            }
         }
         if characteristic.uuid == txCharUUID {
             print("Packet \(packetCount) has been delivered")
@@ -248,7 +262,7 @@ extension CentralBluetoothManager: StreamDelegate {
         case Stream.Event.hasSpaceAvailable:
             print("Space is available")
             //UIupdate
-            self.viewController?.uiUpdate(uiState: .afterChannelOpening)
+            self.uiDelegate?.uiUpdate(uiState: .afterChannelOpening)
         case Stream.Event.errorOccurred:
             print("Stream error")
         default:
