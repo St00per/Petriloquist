@@ -10,24 +10,21 @@ import UIKit
 import CoreBluetooth
 
 class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
-   
+ 
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
     @IBOutlet weak var noResponseButtonView: UIView!
     @IBOutlet weak var scanView: UIView!
     @IBOutlet weak var connectView: UIView!
     @IBOutlet weak var connectLabel: UILabel!
-    //@IBOutlet weak var downloadView: UIView!
     @IBOutlet weak var listenButton: UIButton!
     @IBOutlet weak var talkButton: UIButton!
     @IBOutlet weak var talkButtonLabel: UILabel!
     @IBOutlet weak var talkButtonView: UIView!
     @IBOutlet weak var sendingTypeLabel: UILabel!
-    //@IBOutlet weak var totalDataLabel: UILabel!
     @IBOutlet weak var listenView: UIView!
     @IBOutlet weak var headerView: UIView!
-    //@IBOutlet weak var speedResultView: UIView!
-    //@IBOutlet weak var speedResultsLabel: UILabel!
+    
     @IBOutlet weak var packetSizeSlider: UISlider!
     @IBOutlet weak var packetSizeLabel: UILabel!
     
@@ -36,9 +33,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         case withResponse
         case withoutResponse
     }
-    
-    
-    
+    var speedResult: String = ""
     var audioInput: TempiAudioInput!
     var recSamples: [Float] = []
     var wholeTestData = Data()

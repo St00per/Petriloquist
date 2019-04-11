@@ -22,9 +22,7 @@ public enum uiState {
 }
 
 class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothManagerUIDelegate {
-    
-    
-    
+  
     @IBOutlet weak var l2CapButtonView: UIView!
     @IBOutlet weak var responseButtonView: UIView!
     @IBOutlet weak var noResponseButtonView: UIView!
@@ -61,6 +59,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     var recSamples: [Float] = [] {
         didSet {
             //ToneGenerator.pcmArray = recSamples
+        }
+    }
+    var speedResult: String = "" {
+        didSet {
+            speedResultsLabel.text = speedResult
         }
     }
     var wholeTestData = Data()

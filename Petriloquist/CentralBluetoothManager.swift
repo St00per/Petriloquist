@@ -28,7 +28,7 @@ protocol BluetoothManagerUIDelegate {
     var maxValueResponse: Int { get set }
     var maxValueNoResponse: Int { get set }
     var startingPoint: Int { get set }
-    //var speedResultsLabel: UILabel { get set }
+    var speedResult: String { get set }
     var recSamples: [Float] { get set }
     func uiUpdate(uiState: uiState)
     func sendingTimerStart()
@@ -186,7 +186,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             guard let resultValue = characteristic.value, let result = String(data: resultValue, encoding: .utf8) else { return }
             print(result)
             if ((uiDelegate as? MainViewController) != nil) {
-                //self.uiDelegate?.speedResultsLabel.text = result
+                self.uiDelegate?.speedResult = result
             }
             self.uiDelegate?.uiUpdate(uiState: .dataHasSent)
             packetCount = 0
