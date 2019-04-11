@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreBluetooth
+import AVFoundation
 
 class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
  
@@ -326,4 +327,47 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         uiUpdate(uiState: .dataHasSent)
         sendTotalRecordedDataCount()
     }
+    
+    //Create file from recorded PCM float data
+    func createFile(from data: [Float], temporary: Bool = false, filename: String = "TestRecord.wav") -> URL? {
+        var urlString: String
+        if temporary {
+            urlString = filename
+            if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString) {
+                try? FileManager.default.removeItem(at: url)
+            }
+        } else {
+            urlString = filename
+        }
+        let recordSettings: [String : Any] = [
+            AVFormatIDKey: kAudioFormatLinearPCM,
+            AVSampleRateKey: 44100,
+            AVNumberOfChannelsKey: 1,
+            AVLinearPCMBitDepthKey: 32,
+            AVLinearPCMIsFloatKey: true
+            ] as [String : Any]
+        guard
+            let audioUrl = (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString)),
+            let file = try? AVAudioFile(forWriting: audioUrl, settings: recordSettings, commonFormat: AVAudioCommonFormat.pcmFormatFloat32, interleaved: true),
+            let format = AVAudioFormat(settings: recordSettings) else {
+                print("CreateFile error. Returning nil...")
+                return nil
+        }
+        let outputBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(data.count))!
+        for i in 0..<data.count {
+            if let floatChannelDataPointee = outputBuffer.floatChannelData?.pointee {
+                floatChannelDataPointee[i] = data[i]
+            }
+        }
+        outputBuffer.frameLength = AVAudioFrameCount(data.count)
+        
+        do {
+            try file.write(from: outputBuffer)
+        } catch {
+            print("error:", error.localizedDescription)
+        }
+        
+        return audioUrl
+    }
+    
 }

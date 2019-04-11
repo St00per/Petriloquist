@@ -31,6 +31,7 @@ protocol BluetoothManagerUIDelegate {
     var speedResult: String { get set }
     var recSamples: [Float] { get set }
     func uiUpdate(uiState: uiState)
+    func sendArrayCount()
     func sendingTimerStart()
 }
 
@@ -231,16 +232,15 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         }
         if characteristic.uuid == packetSizeCharUUID {
            print("Packet size sent")
-            self.uiDelegate?.sendingTimerStart()
-            //self.viewController?.sendArrayCount()
+            self.uiDelegate?.sendArrayCount()
         }
         if characteristic.uuid == arrayCountCharUUID {
             //print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
             self.uiDelegate?.startingPoint = 0
             if ((uiDelegate as? TalkModeViewController) != nil) {
                 self.uiDelegate?.recSamples = []
-
             }
+            self.uiDelegate?.sendingTimerStart()
         }
         if characteristic.uuid == txCharUUID {
             print("Packet \(packetCount) has been delivered")

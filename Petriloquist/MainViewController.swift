@@ -80,68 +80,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         super.viewDidLoad()
         //UIpreparation
         uiUpdate(uiState: .firstLoad)
-        
 
-        //Append recording callback
-        let audioInputCallback: TempiAudioInputCallback = { (timeStamp, numberOfFrames, samples) -> Void in
-
-            self.recSamples.append(contentsOf: samples)
-            self.wholeTestData = Data(buffer: UnsafeBufferPointer(start: &self.recSamples, count: self.recSamples.count))
-            print(self.recSamples.count)
-        }
-        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 4000, numberOfChannels: 1)
-        
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
-        //managerBluetooth.viewController = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
         managerBluetooth.uiDelegate = self
     }
-    
-    //Create file from recorded PCM float data
-    func createFile(from data: [Float], temporary: Bool = false, filename: String = "TestRecord.wav") -> URL? {
-        var urlString: String
-        if temporary {
-            urlString = filename
-            if let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString) {
-                try? FileManager.default.removeItem(at: url)
-            }
-        } else {
-            urlString = filename
-        }
-        let recordSettings: [String : Any] = [
-            AVFormatIDKey: kAudioFormatLinearPCM,
-            AVSampleRateKey: 44100,
-            AVNumberOfChannelsKey: 1,
-            AVLinearPCMBitDepthKey: 32,
-            AVLinearPCMIsFloatKey: true
-            ] as [String : Any]
-        guard
-            let audioUrl = (FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(urlString)),
-            let file = try? AVAudioFile(forWriting: audioUrl, settings: recordSettings, commonFormat: AVAudioCommonFormat.pcmFormatFloat32, interleaved: true),
-            let format = AVAudioFormat(settings: recordSettings) else {
-                print("CreateFile error. Returning nil...")
-                return nil
-        }
-        let outputBuffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: AVAudioFrameCount(data.count))!
-        for i in 0..<data.count {
-            if let floatChannelDataPointee = outputBuffer.floatChannelData?.pointee {
-                floatChannelDataPointee[i] = data[i]
-            }
-        }
-        outputBuffer.frameLength = AVAudioFrameCount(data.count)
-        
-        do {
-            try file.write(from: outputBuffer)
-        } catch {
-            print("error:", error.localizedDescription)
-        }
-        
-        return audioUrl
-    }
-    
+ 
     //Array size calculation for selected packet size
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
@@ -161,26 +108,23 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         }
     }
  
-    
     func l2CapDataSend() {
         print("TRY TO SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
             return
         }
         if ostream.hasSpaceAvailable {
-            if startingPoint + dataPacketSize < wholeTestData.count {
+            
             let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
                 _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
                 self.startingPoint = startingPoint + dataPacketSize
-            }
-            
         }
     }
     
     func charDataSend(withResponse: Bool) {
         print("TRY TO SEND")
         guard managerBluetooth.peripheral.canSendWriteWithoutResponse else { return }
-        if startingPoint + dataPacketSize < wholeTestData.count {
+        
         let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
         self.startingPoint = startingPoint + dataPacketSize
         var responseType: CBCharacteristicWriteType
@@ -192,7 +136,6 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         managerBluetooth.peripheral.writeValue(testData,
                                                for: managerBluetooth.txCharacteristic,
                                                type: responseType)
-        }
     }
     
     func sendTotalRecordedDataCount() {
@@ -249,25 +192,13 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     @objc func printTimerCount() {
         print(testDataTimer.timeInterval)
     }
-    
-    @IBAction func startListen(_ sender: UIButton) {
-        //print("LISTEN PRESSED")
-    }
-    
-    @IBAction func stopListen(_ sender: UIButton) {
-        // print("Listen released")
-    }
  
     @IBAction func sliderScroll(_ sender: UISlider) {
         self.dataPacketSize = Int(sender.value)
         packetSizeLabel.text = "\(String(Int(sender.value))) bytes"
     }
     
-    func selectionClear() {
-        l2CapButtonView.backgroundColor = UIColor(hexString: "90DAE4")
-        responseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
-        noResponseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
-    }
+    
     
     @IBAction func l2CapSelect(_ sender: UIButton) {
         self.selectedSendingType = .l2Cap
@@ -296,10 +227,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     @IBAction func startTalk(_ sender: UIButton) {
         print("START SENDING")
         guard managerBluetooth.peripheral.state == .connected else { return }
-        
-        //Start mic recording
-        //audioInput.startRecording()
-        
+   
         //Preparation data for sending
         fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
@@ -310,14 +238,10 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
         sendPacketSize()
-   
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        print("STOP SENDING")
-        
-        testDataTimer.invalidate()
-        uiUpdate(uiState: .dataHasSent)
+
     }
     
     @IBAction func showTalkMode(_ sender: UIButton) {
@@ -341,6 +265,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
             print("TRY TO CONNECT")
             managerBluetooth.connect(peripheral: managerBluetooth.peripheral)
         }
+    }
+    
+    func selectionClear() {
+        l2CapButtonView.backgroundColor = UIColor(hexString: "90DAE4")
+        responseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
+        noResponseButtonView.backgroundColor = UIColor(hexString: "90DAE4")
     }
     
     func sendingTypeSelectionUpdate(sendingType: sendingType) {
