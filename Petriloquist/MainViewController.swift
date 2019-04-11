@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import AudioToolbox
 import CoreBluetooth
 
 class MainViewController: UIViewController, AVAudioRecorderDelegate {
@@ -50,6 +51,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
+    //var audioCodec: AudioCodec!
     var audioInput: TempiAudioInput!
     var testArray: [Float32] = []
     var recSamples: [Float] = [] {
@@ -167,6 +169,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     func charDataSend(withResponse: Bool) {
         print("TRY TO SEND")
         guard managerBluetooth.peripheral.canSendWriteWithoutResponse else { return }
+        if startingPoint + dataPacketSize < wholeTestData.count {
         let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
         self.startingPoint = startingPoint + dataPacketSize
         var responseType: CBCharacteristicWriteType
@@ -178,6 +181,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
         managerBluetooth.peripheral.writeValue(testData,
                                                for: managerBluetooth.txCharacteristic,
                                                type: responseType)
+        }
     }
     
     func sendTotalRecordedDataCount() {
@@ -328,6 +332,15 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
 //        }
     }
     
+    @IBAction func showTalkMode(_ sender: UIButton) {
+        let mainStoryboard: UIStoryboard = UIStoryboard(name: "TalkMode", bundle: nil)
+        guard let desVC = mainStoryboard.instantiateViewController(withIdentifier: "TalkModeViewController") as? TalkModeViewController else {
+            return
+        }
+        show(desVC, sender: nil)
+    }
+    
+    
     @objc func connectToDevice() {
         guard let peripheral = managerBluetooth.peripheral else {
             return
@@ -375,7 +388,6 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
             headerView.alpha = 0.3
             headerView.isUserInteractionEnabled = false
             packetSizeLabel.text = "\(String(176)) bytes"
-            listenView.alpha = 0.3
             talkButtonView.alpha = 0.3
             talkButtonView.isUserInteractionEnabled = false
             speedResultView.alpha = 0.3

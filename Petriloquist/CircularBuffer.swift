@@ -80,7 +80,7 @@ class ToneGenerator {
         let buffer = abl[0]
         let pointer: UnsafeMutableBufferPointer<Float32> = UnsafeMutableBufferPointer(buffer)
         shift += Int(inNumberFrames)
-        print(shift)
+        //print(shift)
         for index in 0..<inNumberFrames {
             let pointerIndex = pointer.startIndex.advanced(by: Int(index))
             pointer[pointerIndex] = pcmArray[Int(index + UInt32(shift))]

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E47B979225F2E5100CF4AE5 /* TalkModeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */; };
+		0E47B97B225F2E6D00CF4AE5 /* TalkMode.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E47B97A225F2E6D00CF4AE5 /* TalkMode.storyboard */; };
 		0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5761E1225B31120073A6AA /* CircularBuffer.swift */; };
 		0E59893A224DDAC300DD167B /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E598939224DDAC300DD167B /* MainViewController.swift */; };
 		0E59893C224DDB5600DD167B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E59893B224DDB5600DD167B /* Main.storyboard */; };
@@ -16,9 +18,12 @@
 		0E771DB8224CD1FF0051DE5D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E771DB6224CD1FF0051DE5D /* LaunchScreen.storyboard */; };
 		0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */; };
 		0E8BB33C225C4F8800A96563 /* TestRecord.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0E8BB33B225C4F8800A96563 /* TestRecord.wav */; };
+		0ED7DE0F225E0A3100B51793 /* AudioBufferConverter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ED7DE0E225E0A3100B51793 /* AudioBufferConverter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkModeViewController.swift; sourceTree = "<group>"; };
+		0E47B97A225F2E6D00CF4AE5 /* TalkMode.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = TalkMode.storyboard; sourceTree = "<group>"; };
 		0E5761E1225B31120073A6AA /* CircularBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularBuffer.swift; sourceTree = "<group>"; };
 		0E598939224DDAC300DD167B /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		0E59893B224DDB5600DD167B /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
@@ -30,6 +35,7 @@
 		0E771DB9224CD1FF0051DE5D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CentralBluetoothManager.swift; sourceTree = "<group>"; };
 		0E8BB33B225C4F8800A96563 /* TestRecord.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = TestRecord.wav; sourceTree = "<group>"; };
+		0ED7DE0E225E0A3100B51793 /* AudioBufferConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioBufferConverter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -65,9 +71,12 @@
 				0E8BB33B225C4F8800A96563 /* TestRecord.wav */,
 				0E670CEE22574071001BD5CA /* TempiAudioInput.swift */,
 				0E598939224DDAC300DD167B /* MainViewController.swift */,
+				0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */,
 				0E5761E1225B31120073A6AA /* CircularBuffer.swift */,
+				0ED7DE0E225E0A3100B51793 /* AudioBufferConverter.swift */,
 				0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */,
 				0E59893B224DDB5600DD167B /* Main.storyboard */,
+				0E47B97A225F2E6D00CF4AE5 /* TalkMode.storyboard */,
 				0E771DAD224CD1FC0051DE5D /* AppDelegate.swift */,
 				0E771DB4224CD1FF0051DE5D /* Assets.xcassets */,
 				0E771DB6224CD1FF0051DE5D /* LaunchScreen.storyboard */,
@@ -135,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				0E59893C224DDB5600DD167B /* Main.storyboard in Resources */,
+				0E47B97B225F2E6D00CF4AE5 /* TalkMode.storyboard in Resources */,
 				0E8BB33C225C4F8800A96563 /* TestRecord.wav in Resources */,
 				0E771DB8224CD1FF0051DE5D /* LaunchScreen.storyboard in Resources */,
 				0E771DB5224CD1FF0051DE5D /* Assets.xcassets in Resources */,
@@ -151,8 +161,10 @@
 				0E59893A224DDAC300DD167B /* MainViewController.swift in Sources */,
 				0E670CEF22574071001BD5CA /* TempiAudioInput.swift in Sources */,
 				0E771DAE224CD1FC0051DE5D /* AppDelegate.swift in Sources */,
+				0E47B979225F2E5100CF4AE5 /* TalkModeViewController.swift in Sources */,
 				0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */,
 				0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */,
+				0ED7DE0F225E0A3100B51793 /* AudioBufferConverter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

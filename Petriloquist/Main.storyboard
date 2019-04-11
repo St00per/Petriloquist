@@ -85,8 +85,8 @@
                                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gRW-vS-lCL">
                                                         <rect key="frame" x="183" y="0.0" width="172" height="156"/>
                                                         <subviews>
-                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="LISTEN" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZKr-fX-adE">
-                                                                <rect key="frame" x="50.5" y="63.5" width="71.5" height="29"/>
+                                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="TALK MODE" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZKr-fX-adE">
+                                                                <rect key="frame" x="23" y="63.5" width="126.5" height="29"/>
                                                                 <fontDescription key="fontDescription" name="Futura-Medium" family="Futura" pointSize="22"/>
                                                                 <nil key="textColor"/>
                                                                 <nil key="highlightedColor"/>
@@ -94,6 +94,7 @@
                                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="f03-Cj-9N9">
                                                                 <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
                                                                 <connections>
+                                                                    <action selector="showTalkMode:" destination="bA5-gp-b9X" eventType="touchUpInside" id="PbX-Dl-tlT"/>
                                                                     <action selector="startListen:" destination="bA5-gp-b9X" eventType="touchDown" id="mfb-sC-yKi"/>
                                                                     <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchUpInside" id="FKn-0q-IK9"/>
                                                                     <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchCancel" id="PCO-6d-4R4"/>

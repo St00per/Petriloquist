@@ -20,7 +20,7 @@ class TempiAudioInput: NSObject {
     let audioSession : AVAudioSession = AVAudioSession.sharedInstance()
     var sampleRate: Float
     var numberOfChannels: Int
-    
+    let audioConverter: AudioBufferConverter
     /// When true, performs DC offset rejection on the incoming buffer before invoking the audioInputCallback.
     var shouldPerformDCOffsetRejection: Bool = false
     
@@ -38,6 +38,7 @@ class TempiAudioInput: NSObject {
         self.sampleRate = sampleRate
         self.numberOfChannels = numberOfChannels
         audioInputCallback = callback
+        audioConverter = AudioBufferConverter()
     }
 
     /// Start recording. Prompts for access to microphone if necessary.
@@ -100,6 +101,9 @@ class TempiAudioInput: NSObject {
         var monoSamples = [Float]()
         let ptr = bufferList.mBuffers.mData?.assumingMemoryBound(to: Float.self)
         monoSamples.append(contentsOf: UnsafeBufferPointer(start: ptr, count: Int(inNumberFrames)))
+        
+        let outputFormat = AudioBufferFormatHelper.AACFormat()
+        //let inputFormat = bufferList.mBuffers.
         
         if audioInput.shouldPerformDCOffsetRejection {
             DCRejectionFilterProcessInPlace(&monoSamples, count: Int(inNumberFrames))
