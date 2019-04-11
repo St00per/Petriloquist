@@ -26,6 +26,9 @@
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ExG-OO-yNQ">
                                                 <rect key="frame" x="0.0" y="0.0" width="355" height="90"/>
+                                                <connections>
+                                                    <action selector="connectDisconnect:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="hzh-j2-wsd"/>
+                                                </connections>
                                             </button>
                                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="CONNECT" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1qM-oT-46a">
                                                 <rect key="frame" x="135" y="34" width="85.5" height="22.5"/>
@@ -53,6 +56,9 @@
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pCn-Il-k0F">
                                                         <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
+                                                        <connections>
+                                                            <action selector="scanPeripherals:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="te5-xg-eDz"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="SCAN" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="b0R-dK-aqe">
                                                         <rect key="frame" x="61.5" y="67" width="49.5" height="22.5"/>
@@ -84,6 +90,12 @@
                                                     </label>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="z8j-li-EF2">
                                                         <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
+                                                        <connections>
+                                                            <action selector="startListen:" destination="Q4D-z0-7Ti" eventType="touchDown" id="8IN-ZE-CNT"/>
+                                                            <action selector="stopListen:" destination="Q4D-z0-7Ti" eventType="touchUpOutside" id="0G4-nz-uH0"/>
+                                                            <action selector="stopListen:" destination="Q4D-z0-7Ti" eventType="touchCancel" id="gOc-TY-PbY"/>
+                                                            <action selector="stopListen:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="sa4-PT-2Av"/>
+                                                        </connections>
                                                     </button>
                                                 </subviews>
                                                 <color key="backgroundColor" red="0.84239957200000004" green="0.54417664060000004" blue="0.043681482190000002" alpha="1" colorSpace="calibratedRGB"/>
@@ -125,6 +137,12 @@
                                             </label>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PQc-19-fxC">
                                                 <rect key="frame" x="0.0" y="0.0" width="355" height="130"/>
+                                                <connections>
+                                                    <action selector="startTalk:" destination="Q4D-z0-7Ti" eventType="touchDown" id="Qja-ws-QHF"/>
+                                                    <action selector="stopTalk:" destination="Q4D-z0-7Ti" eventType="touchUpOutside" id="AsZ-YI-SB3"/>
+                                                    <action selector="stopTalk:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="Ush-nU-6Yq"/>
+                                                    <action selector="stopTalk:" destination="Q4D-z0-7Ti" eventType="touchCancel" id="ds2-zT-7tg"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" red="0.602715373" green="0.83700784660000005" blue="0.602715373" alpha="1" colorSpace="calibratedRGB"/>
@@ -154,6 +172,9 @@
                                 <subviews>
                                     <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="176" minValue="1" maxValue="2048" translatesAutoresizingMaskIntoConstraints="NO" id="6sa-i7-D4M">
                                         <rect key="frame" x="18" y="119" width="359" height="31"/>
+                                        <connections>
+                                            <action selector="sliderScroll:" destination="Q4D-z0-7Ti" eventType="valueChanged" id="jGM-Ke-9sN"/>
+                                        </connections>
                                     </slider>
                                     <stackView opaque="NO" contentMode="scaleToFill" spacing="14" translatesAutoresizingMaskIntoConstraints="NO" id="LX4-gs-BQ1">
                                         <rect key="frame" x="20" y="30" width="355" height="60"/>
@@ -163,6 +184,9 @@
                                                 <subviews>
                                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="2Ib-e4-4BY">
                                                         <rect key="frame" x="0.0" y="0.0" width="110" height="60"/>
+                                                        <connections>
+                                                            <action selector="l2CapSelect:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="kSE-4h-55j"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="L2Cap" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Vs3-46-XZB">
                                                         <rect key="frame" x="30" y="19" width="50.5" height="22.5"/>
@@ -190,6 +214,9 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="107" id="tRp-Xk-ra6"/>
                                                         </constraints>
+                                                        <connections>
+                                                            <action selector="withResponseSelect:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="X8y-M1-dWd"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Response" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xAK-s2-0HJ">
                                                         <rect key="frame" x="17.5" y="19" width="72.5" height="22.5"/>
@@ -216,6 +243,9 @@
                                                         <constraints>
                                                             <constraint firstAttribute="width" constant="110" id="fZc-i6-um1"/>
                                                         </constraints>
+                                                        <connections>
+                                                            <action selector="withoutResponseSelect:" destination="Q4D-z0-7Ti" eventType="touchUpInside" id="8TT-Jx-QSq"/>
+                                                        </connections>
                                                     </button>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="NoResponse" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="KRb-8c-ycO">
                                                         <rect key="frame" x="6.5" y="19" width="97" height="22.5"/>
@@ -330,6 +360,23 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="aiR-e0-6IR"/>
                     </view>
+                    <connections>
+                        <outlet property="connectLabel" destination="1qM-oT-46a" id="3io-fT-0mb"/>
+                        <outlet property="connectView" destination="88J-yQ-Jgz" id="XJt-l2-Fee"/>
+                        <outlet property="headerView" destination="OlQ-Uz-GSi" id="IuQ-Xg-T3p"/>
+                        <outlet property="l2CapButtonView" destination="o33-6V-Qp3" id="9n1-KF-5y9"/>
+                        <outlet property="listenButton" destination="z8j-li-EF2" id="dLY-X0-t84"/>
+                        <outlet property="listenView" destination="ZGg-uN-egq" id="xDZ-8L-C5i"/>
+                        <outlet property="noResponseButtonView" destination="dN4-Y9-4L3" id="X5Z-ih-jA6"/>
+                        <outlet property="packetSizeLabel" destination="8mc-wD-NKB" id="vTx-XY-gbR"/>
+                        <outlet property="packetSizeSlider" destination="6sa-i7-D4M" id="eur-BP-yk4"/>
+                        <outlet property="responseButtonView" destination="yAi-iT-CGb" id="pfS-Hg-921"/>
+                        <outlet property="scanView" destination="Mxw-5i-4La" id="d9E-lU-9SY"/>
+                        <outlet property="sendingTypeLabel" destination="ke2-ot-vIV" id="Y8Q-Qs-Ycg"/>
+                        <outlet property="talkButton" destination="PQc-19-fxC" id="uP1-PE-vvU"/>
+                        <outlet property="talkButtonLabel" destination="AjK-s8-xVA" id="5Ja-4L-VLi"/>
+                        <outlet property="talkButtonView" destination="LNQ-bR-MYa" id="a7F-Aj-2kV"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="HFK-pF-h2c" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>

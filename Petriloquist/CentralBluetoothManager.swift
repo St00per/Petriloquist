@@ -29,6 +29,7 @@ class CentralBluetoothManager: NSObject {
     public static let `default` = CentralBluetoothManager()
     
     var viewController: MainViewController?
+    var talkModeViewController: TalkModeViewController?
     var delegate: BluetoothManagerConnectDelegate?
     var centralManager: CBCentralManager!
     var peripheral: CBPeripheral!

@@ -283,53 +283,30 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate {
     }
     
     @IBAction func startTalk(_ sender: UIButton) {
-        print("START RECORDING")
+        print("START SENDING")
         guard managerBluetooth.peripheral.state == .connected else { return }
         
         //Start mic recording
-        audioInput.startRecording()
+        //audioInput.startRecording()
         
         //Preparation data for sending
-//        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
-//        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
-//        print(wholeTestData.count)
+        fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
+        wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
+        print(wholeTestData.count)
         
         //UIupdate
         uiUpdate(uiState: .dataAreSending)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
         sendPacketSize()
-        
-        //AudioUnit implemented playback
-//        do {
-//            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-//            try AVAudioSession.sharedInstance().setActive(true)
-//        } catch {
-//            print(error)
-//        }
-//        toneGenerator.start()
+   
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        print("STOP RECORDING")
-        //Record and send testing
-        audioInput.stopRecording()
+        print("STOP SENDING")
+        
         testDataTimer.invalidate()
         uiUpdate(uiState: .dataHasSent)
-        sendTotalRecordedDataCount()
-//        startingPoint = 0
-//        recSamples = []
-//        print(recSamples.count)
-//        createFile(from: recSamples)
-        
-        
-        //toneGenerator testing
-//        toneGenerator.stop()
-//        do {
-//            try AVAudioSession.sharedInstance().setActive(false)
-//        } catch {
-//            print(error)
-//        }
     }
     
     @IBAction func showTalkMode(_ sender: UIButton) {
