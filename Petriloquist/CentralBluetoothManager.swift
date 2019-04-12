@@ -231,7 +231,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.uiDelegate?.sendArrayCount()
             }
             if ((uiDelegate as? TalkModeViewController) != nil) {
-                
+                self.uiDelegate?.sendPacketSize()
             }
         }
         if characteristic.uuid == arrayCountCharUUID {

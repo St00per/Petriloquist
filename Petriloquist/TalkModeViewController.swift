@@ -89,7 +89,6 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
                 _ = testData.withUnsafeBytes { ostream.write($0, maxLength: testData.count)}
                 self.startingPoint = startingPoint + dataPacketSize
             }
-            
         }
     }
     
