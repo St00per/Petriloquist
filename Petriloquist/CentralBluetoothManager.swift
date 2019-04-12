@@ -30,6 +30,7 @@ protocol BluetoothManagerUIDelegate {
     var startingPoint: Int { get set }
     var speedResult: String { get set }
     var recSamples: [Float] { get set }
+    var sendingIsComplete: Bool { get set }
     func uiUpdate(uiState: uiState)
     func sendPacketSize()
     func sendArrayCount()
@@ -58,6 +59,7 @@ class CentralBluetoothManager: NSObject {
     var inputStream: InputStream!
     var outputStream: OutputStream!
     var isTXPortReady = true
+    var speedTestStarted = true
     var sendingMode: sendingMode = .speedTest
     var packetCount = 1
     var txCharacteristic: CBCharacteristic!
@@ -196,6 +198,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             if result == "SpeedTest" {
                 sendingMode = .speedTest
                 self.uiDelegate?.sendPacketSize()
+                speedTestStarted = true
             }
             if result == "Voice" {
                 sendingMode = .voice
@@ -228,7 +231,10 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         if characteristic.uuid == packetSizeCharUUID {
             print("Packet size sent")
             if ((uiDelegate as? MainViewController) != nil) {
-                self.uiDelegate?.sendArrayCount()
+                if speedTestStarted {
+                    self.uiDelegate?.sendArrayCount()
+                    speedTestStarted = false
+                }
             }
             if ((uiDelegate as? TalkModeViewController) != nil) {
                 self.uiDelegate?.sendPacketSize()
@@ -268,8 +274,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         inputStream.schedule(in: .current, forMode: .default)
         inputStream.open()
     }
-    
-    
+
 }
 
 extension CentralBluetoothManager: StreamDelegate {

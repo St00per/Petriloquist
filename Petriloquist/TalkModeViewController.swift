@@ -43,6 +43,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     var maxValueResponse = 0
     var maxValueNoResponse = 0
     var testDataTimer: Timer!
+    var sendingIsComplete = false
     var selectedSendingType: sendingType = .l2Cap
     var managerBluetooth = CentralBluetoothManager()
     

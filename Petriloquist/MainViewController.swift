@@ -70,9 +70,10 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     var maxValueResponse = 0
     var maxValueNoResponse = 0
     var testDataTimer: Timer!
+    var sendingIsComplete: Bool = false
     var selectedSendingType: sendingType = .l2Cap
     var managerBluetooth = CentralBluetoothManager()
-    var toneGenerator: ToneGenerator = ToneGenerator()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -136,13 +137,13 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
                                                type: responseType)
     }
     
-    func sendTotalRecordedDataCount() {
-        var arrayCount = String(recSamples.count)
-        let arrayCountData = Data(arrayCount.utf8)
-        managerBluetooth.peripheral.writeValue(arrayCountData,
-                                               for: managerBluetooth.arrayCountCharacteristic,
-                                               type: .withResponse)
-    }
+//    func sendTotalRecordedDataCount() {
+//        var arrayCount = String(recSamples.count)
+//        let arrayCountData = Data(arrayCount.utf8)
+//        managerBluetooth.peripheral.writeValue(arrayCountData,
+//                                               for: managerBluetooth.arrayCountCharacteristic,
+//                                               type: .withResponse)
+//    }
     
     func sendArrayCount() {
         var arrayCount = String(calculatedArraySize(packetSize: dataPacketSize))
@@ -178,7 +179,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     }
     
     @objc func sendNextDataPiece() {
-        
+        guard !sendingIsComplete else { return }
         switch selectedSendingType {
         case .l2Cap:
             l2CapDataSend()
@@ -187,11 +188,13 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         case .withoutResponse:
             charDataSend(withResponse: false)
         }
+        print(startingPoint)
         if wholeTestData.count - startingPoint <= 0 {
             testDataTimer.invalidate()
             startingPoint = 0
             testArray = []
             print("DATA SENT")
+            sendingIsComplete = true
         }
     }
     
@@ -233,7 +236,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     @IBAction func startTalk(_ sender: UIButton) {
         print("START SENDING")
         guard managerBluetooth.peripheral.state == .connected else { return }
-   
+        sendingIsComplete = false
         //Preparation data for sending
         fillTestFloatArray(totalSize: calculatedArraySize(packetSize: dataPacketSize))
         wholeTestData = Data(buffer: UnsafeBufferPointer(start: &testArray, count: testArray.count))
