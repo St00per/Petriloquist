@@ -48,9 +48,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         case withResponse
         case withoutResponse
     }
-    
-    
-    
+ 
     var recordingSession: AVAudioSession!
     var audioRecorder: AVAudioRecorder!
     //var audioCodec: AudioCodec!
@@ -162,6 +160,14 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
                                                type: .withResponse)
     }
     
+    func sendPeripheralModeSwitcher() {
+        var packetSize = String(0)
+        let packetSizeData = Data(packetSize.utf8)
+        managerBluetooth.peripheral.writeValue(packetSizeData,
+                                               for: managerBluetooth.packetSizeCharacteristic,
+                                               type: .withResponse)
+    }
+    
     func sendingTimerStart() {
         testDataTimer = Timer(timeInterval: 0.001,
                               target: self,
@@ -237,7 +243,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         uiUpdate(uiState: .dataAreSending)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
-        sendPacketSize()
+        sendPeripheralModeSwitcher()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {

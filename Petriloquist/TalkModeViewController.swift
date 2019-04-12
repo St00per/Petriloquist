@@ -54,7 +54,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
             
             self.recSamples.append(contentsOf: samples)
             self.wholeTestData = Data(buffer: UnsafeBufferPointer(start: &self.recSamples, count: self.recSamples.count))
-            print(self.recSamples.count)
+            //print(self.recSamples.count)
         }
         audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 4000, numberOfChannels: 1)
         
@@ -79,7 +79,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     }
     
     func l2CapDataSend() {
-        print("TRY TO SEND")
+        print("TRY TO VOICE SEND")
         guard let ostream = managerBluetooth.channel?.outputStream else {
             return
         }
@@ -94,7 +94,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     }
     
     func charDataSend(withResponse: Bool) {
-        print("TRY TO SEND")
+        print("TRY TO VOICE SEND")
         guard managerBluetooth.peripheral.canSendWriteWithoutResponse else { return }
         if startingPoint + dataPacketSize < wholeTestData.count {
             let testData = wholeTestData.subdata(in: startingPoint..<startingPoint + dataPacketSize)
@@ -127,6 +127,14 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
                                                type: .withResponse)
     }
     
+    func sendPeripheralStateSwitcher() {
+        var packetSize = String(1)
+        let packetSizeData = Data(packetSize.utf8)
+        managerBluetooth.peripheral.writeValue(packetSizeData,
+                                               for: managerBluetooth.packetSizeCharacteristic,
+                                               type: .withResponse)
+    }
+    
     func sendPacketSize() {
         var packetSize = String(self.dataPacketSize)
         let packetSizeData = Data(packetSize.utf8)
@@ -154,12 +162,12 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         case .withoutResponse:
             charDataSend(withResponse: false)
         }
-        if wholeTestData.count - startingPoint <= 0 {
-            testDataTimer.invalidate()
-            startingPoint = 0
-            
-            print("DATA SENT")
-        }
+//        if wholeTestData.count - startingPoint <= 0 {
+//            testDataTimer.invalidate()
+//            startingPoint = 0
+//
+//            print("DATA SENT")
+//        }
     }
     
     func close() {
@@ -237,14 +245,14 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
             headerView.alpha = 0.3
             headerView.isUserInteractionEnabled = false
             
-            talkButtonLabel.text = "SEND DATA"
+            talkButtonLabel.text = "TALK"
             talkButton.isUserInteractionEnabled = true
         case .dataAreSending:
-            talkButton.isUserInteractionEnabled = false
-            talkButtonLabel.text = "SENDING DATA..."
+//            talkButton.isUserInteractionEnabled = false
+            talkButtonLabel.text = "SENDING..."
             
         case .dataHasSent:
-            talkButtonLabel.text = "SEND DATA"
+            talkButtonLabel.text = "TALK"
             talkButton.isUserInteractionEnabled = true
             
         }
@@ -307,7 +315,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         uiUpdate(uiState: .dataAreSending)
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
-        sendPacketSize()
+        sendPeripheralStateSwitcher()
         
         //AudioUnit implemented playback
         //        do {

@@ -95,14 +95,10 @@
                                                                 <rect key="frame" x="0.0" y="0.0" width="172" height="156"/>
                                                                 <connections>
                                                                     <action selector="showTalkMode:" destination="bA5-gp-b9X" eventType="touchUpInside" id="PbX-Dl-tlT"/>
-                                                                    <action selector="startListen:" destination="bA5-gp-b9X" eventType="touchDown" id="mfb-sC-yKi"/>
-                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchUpInside" id="FKn-0q-IK9"/>
-                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchCancel" id="PCO-6d-4R4"/>
-                                                                    <action selector="stopListen:" destination="bA5-gp-b9X" eventType="touchUpOutside" id="yo6-UP-zzs"/>
                                                                 </connections>
                                                             </button>
                                                         </subviews>
-                                                        <color key="backgroundColor" red="0.8423995719829076" green="0.54417664064487936" blue="0.043681482194175184" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <color key="backgroundColor" red="0.97254901960784312" green="0.60392156862745094" blue="0.17254901960784313" alpha="1" colorSpace="calibratedRGB"/>
                                                         <constraints>
                                                             <constraint firstItem="ZKr-fX-adE" firstAttribute="centerX" secondItem="gRW-vS-lCL" secondAttribute="centerX" id="1EA-qP-jgf"/>
                                                             <constraint firstItem="f03-Cj-9N9" firstAttribute="leading" secondItem="gRW-vS-lCL" secondAttribute="leading" id="2qg-D6-xm4"/>

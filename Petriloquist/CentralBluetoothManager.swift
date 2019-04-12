@@ -31,8 +31,14 @@ protocol BluetoothManagerUIDelegate {
     var speedResult: String { get set }
     var recSamples: [Float] { get set }
     func uiUpdate(uiState: uiState)
+    func sendPacketSize()
     func sendArrayCount()
     func sendingTimerStart()
+}
+
+enum sendingMode {
+    case speedTest
+    case voice
 }
 
 class CentralBluetoothManager: NSObject {
@@ -52,6 +58,7 @@ class CentralBluetoothManager: NSObject {
     var inputStream: InputStream!
     var outputStream: OutputStream!
     var isTXPortReady = true
+    var sendingMode: sendingMode = .speedTest
     var packetCount = 1
     var txCharacteristic: CBCharacteristic!
     var rxCharacteristic: CBCharacteristic!
@@ -186,10 +193,20 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         if characteristic.uuid == resultStringCharUUID {
             guard let resultValue = characteristic.value, let result = String(data: resultValue, encoding: .utf8) else { return }
             print(result)
-            if ((uiDelegate as? MainViewController) != nil) {
-                self.uiDelegate?.speedResult = result
+            if result == "SpeedTest" {
+                sendingMode = .speedTest
+                self.uiDelegate?.sendPacketSize()
             }
-            self.uiDelegate?.uiUpdate(uiState: .dataHasSent)
+            if result == "Voice" {
+                sendingMode = .voice
+                self.uiDelegate?.startingPoint = 0// - ?
+                self.uiDelegate?.recSamples = []
+                self.uiDelegate?.sendingTimerStart()
+            }
+            if ((uiDelegate as? MainViewController) != nil), sendingMode == .speedTest, result != "SpeedTest", result != "Voice" {
+                self.uiDelegate?.speedResult = result
+                self.uiDelegate?.uiUpdate(uiState: .dataHasSent)
+            }
             packetCount = 0
         }
         
@@ -200,6 +217,33 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             } else {
                 print("Problem decoding PSM")
             }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard error == nil else {
+            print("Write error")
+            return
+        }
+        if characteristic.uuid == packetSizeCharUUID {
+            print("Packet size sent")
+            if ((uiDelegate as? MainViewController) != nil) {
+                self.uiDelegate?.sendArrayCount()
+            }
+            if ((uiDelegate as? TalkModeViewController) != nil) {
+                
+            }
+        }
+        if characteristic.uuid == arrayCountCharUUID {
+            //print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
+            if ((uiDelegate as? MainViewController) != nil) {
+                self.uiDelegate?.startingPoint = 0
+                self.uiDelegate?.sendingTimerStart()
+            }
+        }
+        if characteristic.uuid == txCharUUID {
+            print("Packet \(packetCount) has been delivered")
+            packetCount += 1
         }
     }
     
@@ -225,28 +269,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
         inputStream.open()
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        guard error == nil else {
-            print("Write error")
-            return
-        }
-        if characteristic.uuid == packetSizeCharUUID {
-           print("Packet size sent")
-            self.uiDelegate?.sendArrayCount()
-        }
-        if characteristic.uuid == arrayCountCharUUID {
-            //print("Total data count has sent \(String(describing: self.viewController?.recSamples.count))")
-            self.uiDelegate?.startingPoint = 0
-            if ((uiDelegate as? TalkModeViewController) != nil) {
-                self.uiDelegate?.recSamples = []
-            }
-            self.uiDelegate?.sendingTimerStart()
-        }
-        if characteristic.uuid == txCharUUID {
-            print("Packet \(packetCount) has been delivered")
-            packetCount += 1
-        }
-    }
+    
 }
 
 extension CentralBluetoothManager: StreamDelegate {
