@@ -56,7 +56,7 @@ public struct RingBuffer<T> {
     }
 }
 
-class ToneGenerator {
+class SamplesPlayer {
     
     fileprivate var toneUnit: AudioUnit? = nil
     static let sampleRate = 44100
@@ -94,7 +94,7 @@ class ToneGenerator {
     init() {
         setupAudioUnit()
         let trackURL = URL(fileURLWithPath: path ?? "")
-        ToneGenerator.pcmArray = readFile(url: trackURL)
+        SamplesPlayer.pcmArray = readFile(url: trackURL)
     }
     
     deinit {
@@ -163,7 +163,7 @@ class ToneGenerator {
         assert(err == noErr, "AudioUnitSetProperty SetRenderCallback failed")
         
         // Set the stream format for the audio unit. That is, the format of the data that our render callback will provide.
-        var streamFormat = AudioStreamBasicDescription(mSampleRate: Float64(ToneGenerator.sampleRate),
+        var streamFormat = AudioStreamBasicDescription(mSampleRate: Float64(SamplesPlayer.sampleRate),
                                                        mFormatID: kAudioFormatLinearPCM,
                                                        mFormatFlags: kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved,
                                                        mBytesPerPacket: 4 /*four bytes per float*/,

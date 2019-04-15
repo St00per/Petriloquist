@@ -39,6 +39,16 @@ protocol BluetoothManagerUIDelegate {
     func sendingTimerStart()
 }
 
+struct SpeedTestData {
+    var packetCounter: Int
+    var transferStartTime: NSDate!
+    var arrayCount: Int
+    var l2capBufLen: Int
+    var lastConnectionInterval: TimeInterval
+    var mainData: Data
+    var connectionIntervals: [TimeInterval]
+}
+
 enum sendingMode {
     case speedTest
     case voice
@@ -57,9 +67,11 @@ class CentralBluetoothManager: NSObject {
     var peripherals: [CBPeripheral] = []
     var petriloquistCharacteristic: CBCharacteristic!
     var transferCharacteristic: CBMutableCharacteristic?
+    
     var channel: CBL2CAPChannel?
     var inputStream: InputStream!
     var outputStream: OutputStream!
+    
     var isTXPortReady = true
     var speedTestStarted = true
     var sendingMode: sendingMode = .speedTest
@@ -73,10 +85,49 @@ class CentralBluetoothManager: NSObject {
     var resultStringCharacteristic: CBCharacteristic!
     var cypressUpdateCount = 0
     var startingTime: NSDate!
+    var stData = SpeedTestData(packetCounter: 0, transferStartTime: nil, arrayCount: 1024, l2capBufLen: 1024,
+                               lastConnectionInterval: 0, mainData: Data(), connectionIntervals: [])
+    let samplesPlayer: SamplesPlayer = SamplesPlayer()
+    var playerIsStarted: Bool = false
+    var transferIsEnded: Bool = false
+    
     
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: nil)
+        
+    }
+    
+    func receiveL2CAPInfo(_ inStream: InputStream) {
+        let bufLength = stData.l2capBufLen
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufLength)
+        let bytesRead = inStream.read(buffer, maxLength: bufLength)
+        let receivedData = Data(bytes: buffer, count: bytesRead)
+        
+        if sendingMode == .speedTest {
+            print("Receiving DATA")
+            //receiveTestData(dataPiece: receivedData, isL2Cap: true)
+        }
+        if sendingMode == .voice {
+            receiveVoiceData(dataPiece: receivedData, isL2Cap: true)
+        }
+    }
+    
+    func receiveVoiceData(dataPiece: Data, isL2Cap: Bool) {
+
+        if stData.packetCounter == 0 {
+            //mainLabel.text = "Receiving voice..."
+            stData.mainData = dataPiece
+        } else {
+            //mainLabel.text = "Receiving voice..."
+            stData.mainData.append(dataPiece)
+            SamplesPlayer.pcmArray = stData.mainData.toArray(type: Float.self)
+            
+            if SamplesPlayer.pcmArray.count > 100 && !playerIsStarted {
+                samplesPlayer.start()
+                playerIsStarted = true
+            }
+        }
     }
 }
 
@@ -320,7 +371,9 @@ extension CentralBluetoothManager: StreamDelegate {
             print("End Encountered")
         case Stream.Event.hasBytesAvailable:
             print("Bytes are available")
-        case Stream.Event.hasSpaceAvailable:
+            if !transferIsEnded {
+                receiveL2CAPInfo(inputStream)
+            }        case Stream.Event.hasSpaceAvailable:
             print("Space is available")
             //UIupdate
             self.uiDelegate?.uiUpdate(uiState: .afterChannelOpening)
@@ -329,5 +382,17 @@ extension CentralBluetoothManager: StreamDelegate {
         default:
             print("Unknown stream event")
         }
+    }
+}
+extension Data {
+    
+    init<T>(fromArray values: [T]) {
+        self = values.withUnsafeBytes { Data($0) }
+    }
+    
+    func toArray<T>(type: T.Type) -> [T] where T: ExpressibleByIntegerLiteral {
+        var array = Array<T>(repeating: 0, count: self.count/MemoryLayout<T>.stride)
+        _ = array.withUnsafeMutableBytes { copyBytes(to: $0) }
+        return array
     }
 }

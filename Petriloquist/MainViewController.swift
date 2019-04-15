@@ -87,7 +87,12 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     override func viewWillAppear(_ animated: Bool) {
         managerBluetooth.uiDelegate = self
     }
- 
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        guard managerBluetooth.peripheral.state == .connected else { return }
+        managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
+    }
+    
     //Array size calculation for selected packet size
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize

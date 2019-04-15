@@ -68,6 +68,11 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         managerBluetooth.uiDelegate = self
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        guard managerBluetooth.peripheral.state == .connected else { return }
+        managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
+    }
+    
     func calculatedArraySize(packetSize: Int) -> Int {
         self.dataPacketSize = packetSize
         var calculatedArraySize = 0
