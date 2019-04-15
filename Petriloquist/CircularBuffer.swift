@@ -8,93 +8,47 @@
 
 import AVFoundation
 
-public struct RingBuffer<T> {
-    private var array: [T?]
-    private var readIndex = 0
-    private var writeIndex = 0
-    
-    public init(count: Int) {
-        array = [T?](repeating: nil, count: count)
-    }
-    
-    /* Returns false if out of space. */
-    @discardableResult public mutating func write(element: T) -> Bool {
-        if !isFull {
-            array[writeIndex % array.count] = element
-            writeIndex += 1
-            return true
-        } else {
-            return false
-        }
-    }
-    
-    /* Returns nil if the buffer is empty. */
-    public mutating func read() -> T? {
-        if !isEmpty {
-            let element = array[readIndex % array.count]
-            readIndex += 1
-            return element
-        } else {
-            return nil
-        }
-    }
-    
-    fileprivate var availableSpaceForReading: Int {
-        return writeIndex - readIndex
-    }
-    
-    public var isEmpty: Bool {
-        return availableSpaceForReading == 0
-    }
-    
-    fileprivate var availableSpaceForWriting: Int {
-        return array.count - availableSpaceForReading
-    }
-    
-    public var isFull: Bool {
-        return availableSpaceForWriting == 0
-    }
-}
-
 class SamplesPlayer {
     
     fileprivate var toneUnit: AudioUnit? = nil
-    static let sampleRate = 44100
+    static let sampleRate = 4000
     static let amplitude: Float = 1.0
     static let frequency: Float = 440
     let path = Bundle.main.path(forResource: "TestRecord", ofType: "wav")
     static var shift: Int = 0
+    static var playerIsStarted: Bool = false
     static var pcmArray: [Float] = [] {
         didSet {
-            //print(pcmArray.count)
+            //print("PCM ARRAY COUNT: \(pcmArray.count)")
         }
     }
     
     /// Theta is changed over time as each sample is provided.
-    static var theta: Float = 0.0
- 
     private let renderCallback: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
-        
         
         guard let abl = UnsafeMutableAudioBufferListPointer(ioData) else { return 0 }
         let buffer = abl[0]
         let pointer: UnsafeMutableBufferPointer<Float32> = UnsafeMutableBufferPointer(buffer)
-        shift += Int(inNumberFrames)
-        //print(shift)
-        for index in 0..<inNumberFrames {
-            let pointerIndex = pointer.startIndex.advanced(by: Int(index))
-            pointer[pointerIndex] = pcmArray[Int(index + UInt32(shift))]
-                //sin(theta) * amplitude
-            //theta += 2.0 * Float(M_PI) * frequency / Float(sampleRate)
-        }
         
+        var maximumIndex = Int((inNumberFrames - 1) + UInt32(shift))
+        if maximumIndex < pcmArray.count {
+            
+            for index in 0..<inNumberFrames {
+                let pointerIndex = pointer.startIndex.advanced(by: Int(index))
+                pointer[pointerIndex] = pcmArray[Int(index + UInt32(shift))]
+            }
+            shift += Int(inNumberFrames - 1)
+            return noErr
+        }
         return noErr
     }
     
     init() {
         setupAudioUnit()
-        let trackURL = URL(fileURLWithPath: path ?? "")
-        SamplesPlayer.pcmArray = readFile(url: trackURL)
+        
+        //Test playback from bundle AudioFile
+        //        let trackURL = URL(fileURLWithPath: path ?? "")
+        //        SamplesPlayer.pcmArray = readFile(url: trackURL)
     }
     
     deinit {
@@ -167,11 +121,11 @@ class SamplesPlayer {
                                                        mFormatID: kAudioFormatLinearPCM,
                                                        mFormatFlags: kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved,
                                                        mBytesPerPacket: 4 /*four bytes per float*/,
-                                                       mFramesPerPacket: 1,
-                                                       mBytesPerFrame: 4,
-                                                       mChannelsPerFrame: 1,
-                                                       mBitsPerChannel: 4*8,
-                                                       mReserved: 0)
+            mFramesPerPacket: 1,
+            mBytesPerFrame: 4,
+            mChannelsPerFrame: 1,
+            mBitsPerChannel: 4*8,
+            mReserved: 0)
         err = AudioUnitSetProperty(toneUnit!,
                                    kAudioUnitProperty_StreamFormat,
                                    kAudioUnitScope_Input,
@@ -182,18 +136,18 @@ class SamplesPlayer {
     }
     
     func start() {
-        print("GENERATOR STARTED")
+        print("Samples Player STARTED. PCM ARRAY COUNT: \(SamplesPlayer.pcmArray.count)")
         var status: OSStatus
         status = AudioUnitInitialize(toneUnit!)
         status = AudioOutputUnitStart(toneUnit!)
-        
         assert(status == noErr)
-        
     }
     
     func stop() {
+        print("Samples Player STOPPED. PCM ARRAY COUNT: \(SamplesPlayer.pcmArray.count)")
         AudioOutputUnitStop(toneUnit!)
         AudioUnitUninitialize(toneUnit!)
+        SamplesPlayer.shift = 0
+        
     }
-    
 }
