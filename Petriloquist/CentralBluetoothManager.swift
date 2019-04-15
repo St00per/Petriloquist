@@ -19,6 +19,8 @@ let psmCharUUID = CBUUID(string: "84e3cbe2-65aa-47b1-9889-ccee3e14824a")
 let packetSizeCharUUID = CBUUID(string: "ad3fde58-4a98-4ddf-b4f2-1d9423baae80")
 let arrayCountCharUUID = CBUUID(string: "6016bb95-c904-4b5c-8464-3204941116ca")
 let resultStringCharUUID = CBUUID(string: "1689582c-74f2-418b-8314-464d04b00c6d")
+//Cypress char
+let cypressCharUUID = CBUUID(string: "F81E56D4-54D5-4DD4-BE72-8291A336F21E")
 
 public protocol BluetoothManagerConnectDelegate {
     func connectingStateSet()
@@ -64,10 +66,13 @@ class CentralBluetoothManager: NSObject {
     var packetCount = 1
     var txCharacteristic: CBCharacteristic!
     var rxCharacteristic: CBCharacteristic!
+    var cypressCharacteristic: CBCharacteristic!
     var psmCharacteristic: CBCharacteristic!
     var packetSizeCharacteristic: CBCharacteristic!
     var arrayCountCharacteristic: CBCharacteristic!
     var resultStringCharacteristic: CBCharacteristic!
+    var cypressUpdateCount = 0
+    var startingTime: NSDate!
     
     override init() {
         super.init()
@@ -100,11 +105,19 @@ extension CentralBluetoothManager: CBCentralManagerDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        
         self.peripheral = peripheral
         self.uiDelegate?.uiUpdate(uiState: .afterSearch)
         print(self.peripheral)
         central.stopScan()
         self.peripheral.delegate = self
+        
+        if peripheral.name == "GATT_Out" {
+            self.peripheral = peripheral
+            print(self.peripheral)
+            central.stopScan()
+            self.peripheral.delegate = self
+        }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
@@ -177,6 +190,10 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.resultStringCharacteristic = characteristic
                 self.peripheral.setNotifyValue(true, for: self.resultStringCharacteristic)
             }
+            if characteristic.uuid == cypressCharUUID {
+                self.cypressCharacteristic = characteristic
+                
+            }
         }
         print("Max write value with response: \(peripheral.maximumWriteValueLength(for: .withResponse))")
         print("Max write value without response: \(peripheral.maximumWriteValueLength(for: .withoutResponse))")
@@ -219,6 +236,22 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.peripheral.openL2CAPChannel(psm)
             } else {
                 print("Problem decoding PSM")
+            }
+        }
+        
+        if characteristic.uuid == cypressCharUUID {
+            if let value = characteristic.value {
+                //print(Array(value))
+                cypressUpdateCount += 1
+                
+                //MARK: Cypress Receiving Speed Calculation
+                if Date().timeIntervalSince(startingTime as Date) > 1 {
+                    startingTime = NSDate()
+                    let currentTransferSpeed = (Int(495 * cypressUpdateCount) * 8)/1000
+                    //print (currentTransferSpeed)
+                    cypressUpdateCount = 0
+                    self.uiDelegate?.speedResult = "\(currentTransferSpeed) Kb/s"
+                }
             }
         }
     }

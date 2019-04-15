@@ -161,6 +161,32 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
                                                type: .withResponse)
     }
     
+    func cypressTestDataAssembling() {
+        let byteCount = 495
+        var value: UInt8 = 0
+        for _ in 0..<byteCount {
+            
+            wholeTestData.append(value)
+            if value == 255 {
+                value = 0
+            } else {
+                value += 1
+            }
+        }
+    }
+    
+    func cypressSendArrayResp() {
+        cypressTestDataAssembling()
+        print(Array(wholeTestData))
+        //print("TRYING TO SEND \(byteCount) bytes.")
+        guard managerBluetooth.peripheral.canSendWriteWithoutResponse else {
+            return
+        }
+        managerBluetooth.peripheral.writeValue(wholeTestData,
+                                               for: managerBluetooth.cypressCharacteristic,
+                                               type: .withoutResponse)
+    }
+    
     func sendPeripheralModeSwitcher() {
         var packetSize = String(0)
         let packetSizeData = Data(packetSize.utf8)
