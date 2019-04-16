@@ -89,6 +89,7 @@ class CentralBluetoothManager: NSObject {
                                lastConnectionInterval: 0, mainData: Data(), connectionIntervals: [])
     let samplesPlayer: SamplesPlayer = SamplesPlayer()
     var playerIsStarted: Bool = false
+    var voiceTransferStarted = true
     var transferIsEnded: Bool = false
     
     
@@ -290,6 +291,7 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
             }
             
             if result == "VoiceStarted" {
+                //voiceTransferStarted = true
                 transferIsEnded = false
             }
             
@@ -344,7 +346,10 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 }
             }
             if ((uiDelegate as? TalkModeViewController) != nil) {
-                self.uiDelegate?.sendPacketSize()
+                if voiceTransferStarted {
+                    self.uiDelegate?.sendPacketSize()
+                    voiceTransferStarted = false
+                }
             }
         }
         if characteristic.uuid == arrayCountCharUUID {

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		0E47B979225F2E5100CF4AE5 /* TalkModeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */; };
 		0E47B97B225F2E6D00CF4AE5 /* TalkMode.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E47B97A225F2E6D00CF4AE5 /* TalkMode.storyboard */; };
-		0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5761E1225B31120073A6AA /* CircularBuffer.swift */; };
+		0E5761E2225B31120073A6AA /* SamplesPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E5761E1225B31120073A6AA /* SamplesPlayer.swift */; };
 		0E59893A224DDAC300DD167B /* MainViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E598939224DDAC300DD167B /* MainViewController.swift */; };
 		0E59893C224DDB5600DD167B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0E59893B224DDB5600DD167B /* Main.storyboard */; };
 		0E670CEF22574071001BD5CA /* TempiAudioInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E670CEE22574071001BD5CA /* TempiAudioInput.swift */; };
@@ -24,7 +24,7 @@
 /* Begin PBXFileReference section */
 		0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TalkModeViewController.swift; sourceTree = "<group>"; };
 		0E47B97A225F2E6D00CF4AE5 /* TalkMode.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = TalkMode.storyboard; sourceTree = "<group>"; };
-		0E5761E1225B31120073A6AA /* CircularBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircularBuffer.swift; sourceTree = "<group>"; };
+		0E5761E1225B31120073A6AA /* SamplesPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SamplesPlayer.swift; sourceTree = "<group>"; };
 		0E598939224DDAC300DD167B /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
 		0E59893B224DDB5600DD167B /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		0E670CEE22574071001BD5CA /* TempiAudioInput.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TempiAudioInput.swift; sourceTree = "<group>"; };
@@ -72,7 +72,7 @@
 				0E670CEE22574071001BD5CA /* TempiAudioInput.swift */,
 				0E598939224DDAC300DD167B /* MainViewController.swift */,
 				0E47B978225F2E5100CF4AE5 /* TalkModeViewController.swift */,
-				0E5761E1225B31120073A6AA /* CircularBuffer.swift */,
+				0E5761E1225B31120073A6AA /* SamplesPlayer.swift */,
 				0ED7DE0E225E0A3100B51793 /* AudioBufferConverter.swift */,
 				0E771DBF224CD7250051DE5D /* CentralBluetoothManager.swift */,
 				0E59893B224DDB5600DD167B /* Main.storyboard */,
@@ -163,7 +163,7 @@
 				0E771DAE224CD1FC0051DE5D /* AppDelegate.swift in Sources */,
 				0E47B979225F2E5100CF4AE5 /* TalkModeViewController.swift in Sources */,
 				0E771DC0224CD7250051DE5D /* CentralBluetoothManager.swift in Sources */,
-				0E5761E2225B31120073A6AA /* CircularBuffer.swift in Sources */,
+				0E5761E2225B31120073A6AA /* SamplesPlayer.swift in Sources */,
 				0ED7DE0F225E0A3100B51793 /* AudioBufferConverter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

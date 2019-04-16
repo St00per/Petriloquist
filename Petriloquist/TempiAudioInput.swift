@@ -43,6 +43,7 @@ class TempiAudioInput: NSObject {
 
     /// Start recording. Prompts for access to microphone if necessary.
     func startRecording() {
+        print ("START RECORDING")
         do {
             
             if self.audioUnit == nil {
@@ -64,6 +65,7 @@ class TempiAudioInput: NSObject {
     
     /// Stop recording.
     func stopRecording() {
+        print ("STOP RECORDING")
         do {
             var osErr: OSStatus = 0
             
@@ -190,13 +192,13 @@ class TempiAudioInput: NSObject {
         
         // Set format to 32 bit, floating point, linear PCM
         var streamFormatDesc:AudioStreamBasicDescription = AudioStreamBasicDescription(
-            mSampleRate:        Double(sampleRate),
+            mSampleRate:        Double(SamplesPlayer.sampleRate),
             mFormatID:          kAudioFormatLinearPCM,
             mFormatFlags:       kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved, // floating point data - docs say this is fastest
             mBytesPerPacket:    4,
             mFramesPerPacket:   1,
             mBytesPerFrame:     4,
-            mChannelsPerFrame:  UInt32(self.numberOfChannels),
+            mChannelsPerFrame:  1,
             mBitsPerChannel:    4 * 8,
             mReserved: 0
         )

@@ -1,5 +1,5 @@
 //
-//  CircularBuffer.swift
+//  SamplesPlayer.swift
 //  Petriloquist
 //
 //  Created by Kirill Shteffen on 08/04/2019.
@@ -121,11 +121,11 @@ class SamplesPlayer {
                                                        mFormatID: kAudioFormatLinearPCM,
                                                        mFormatFlags: kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved,
                                                        mBytesPerPacket: 4 /*four bytes per float*/,
-            mFramesPerPacket: 1,
-            mBytesPerFrame: 4,
-            mChannelsPerFrame: 1,
-            mBitsPerChannel: 4*8,
-            mReserved: 0)
+                                                        mFramesPerPacket: 1,
+                                                        mBytesPerFrame: 4,
+                                                        mChannelsPerFrame: 1,
+                                                        mBitsPerChannel: 4*8,
+                                                        mReserved: 0)
         err = AudioUnitSetProperty(toneUnit!,
                                    kAudioUnitProperty_StreamFormat,
                                    kAudioUnitScope_Input,

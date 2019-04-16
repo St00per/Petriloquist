@@ -322,7 +322,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
         sendPeripheralStateSwitcher()
-        
+        managerBluetooth.voiceTransferStarted = true
         //AudioUnit implemented playback
         //        do {
         //            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)

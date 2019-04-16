@@ -10,23 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/TalkModeViewController.swift"
-            timestampString = "577016911.975153"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "153"
-            endingLineNumber = "153"
-            landmarkName = "sendingTimerStart()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Petriloquist/TalkModeViewController.swift"
-            timestampString = "577016911.97523"
+            timestampString = "577087202.681057"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "96"
@@ -42,7 +26,7 @@
                   moduleName = "Petriloquist"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/KirillShteffen/Petriloquist/Petriloquist/TalkModeViewController.swift"
-                  timestampString = "577082986.041507"
+                  timestampString = "577086144.460933"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "96"
@@ -57,7 +41,7 @@
                   moduleName = "Petriloquist"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/KirillShteffen/Petriloquist/Petriloquist/TalkModeViewController.swift"
-                  timestampString = "577082986.044896"
+                  timestampString = "577086144.464173"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "96"
@@ -74,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/CentralBluetoothManager.swift"
-            timestampString = "577082985.747977"
+            timestampString = "577087202.681132"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "130"
-            endingLineNumber = "130"
+            startingLineNumber = "131"
+            endingLineNumber = "131"
             landmarkName = "receiveVoiceData(dataPiece:isL2Cap:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -90,12 +74,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/CentralBluetoothManager.swift"
-            timestampString = "577082985.748793"
+            timestampString = "577087202.681197"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "119"
-            endingLineNumber = "119"
+            startingLineNumber = "120"
+            endingLineNumber = "120"
             landmarkName = "receiveVoiceData(dataPiece:isL2Cap:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Petriloquist/CentralBluetoothManager.swift"
+            timestampString = "577087202.681255"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "349"
+            endingLineNumber = "349"
+            landmarkName = "peripheral(_:didWriteValueFor:error:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
