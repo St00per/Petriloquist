@@ -19,7 +19,7 @@ class SamplesPlayer {
     static var playerIsStarted: Bool = false
     static var pcmArray: [Float] = [] {
         didSet {
-            //print("PCM ARRAY COUNT: \(pcmArray.count)")
+            print("PCM ARRAY COUNT: \(pcmArray.count)")
         }
     }
     
@@ -52,7 +52,7 @@ class SamplesPlayer {
     }
     
     deinit {
-        stop()
+        //stop()
     }
     
     func readFile(url: URL) -> [Float] {

@@ -118,9 +118,11 @@ class CentralBluetoothManager: NSObject {
         if stData.packetCounter == 0 {
             //mainLabel.text = "Receiving voice..."
             stData.mainData = dataPiece
+            stData.packetCounter += 1
         } else {
             //mainLabel.text = "Receiving voice..."
             stData.mainData.append(dataPiece)
+            stData.packetCounter += 1
             SamplesPlayer.pcmArray = stData.mainData.toArray(type: Float.self)
             
             if SamplesPlayer.pcmArray.count > 100 && !playerIsStarted {
@@ -129,6 +131,17 @@ class CentralBluetoothManager: NSObject {
             }
         }
     }
+    
+    func stopVoiceReceiving() {
+        stData.arrayCount = 1024
+        
+        samplesPlayer.stop()
+        playerIsStarted = false
+        transferIsEnded = true
+        stData.mainData = Data()
+        SamplesPlayer.pcmArray = []
+    }
+    
 }
 
 extension CentralBluetoothManager: CBCentralManagerDelegate {
@@ -274,6 +287,10 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.uiDelegate?.recSamples = []
                 self.uiDelegate?.sendingTimerStart()
             }
+            if result == "VoiceEnded" {
+                stopVoiceReceiving()
+            }
+            
             if ((uiDelegate as? MainViewController) != nil), sendingMode == .speedTest, result != "SpeedTest", result != "Voice" {
                 self.uiDelegate?.speedResult = result
                 self.uiDelegate?.uiUpdate(uiState: .dataHasSent)
@@ -373,7 +390,8 @@ extension CentralBluetoothManager: StreamDelegate {
             print("Bytes are available")
             if !transferIsEnded {
                 receiveL2CAPInfo(inputStream)
-            }        case Stream.Event.hasSpaceAvailable:
+            }
+        case Stream.Event.hasSpaceAvailable:
             print("Space is available")
             //UIupdate
             self.uiDelegate?.uiUpdate(uiState: .afterChannelOpening)

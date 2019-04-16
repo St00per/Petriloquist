@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/TalkModeViewController.swift"
-            timestampString = "576757246.1657"
+            timestampString = "577016911.975153"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "147"
-            endingLineNumber = "147"
-            landmarkName = "sendPacketSize()"
+            startingLineNumber = "153"
+            endingLineNumber = "153"
+            landmarkName = "sendingTimerStart()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/TalkModeViewController.swift"
-            timestampString = "576757246.165778"
+            timestampString = "577016911.97523"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
             landmarkName = "l2CapDataSend()"
             landmarkType = "7">
             <Locations>
@@ -42,11 +42,11 @@
                   moduleName = "Petriloquist"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/KirillShteffen/Petriloquist/Petriloquist/TalkModeViewController.swift"
-                  timestampString = "576756778.196388"
+                  timestampString = "577016912.362505"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "90"
-                  endingLineNumber = "90"
+                  startingLineNumber = "96"
+                  endingLineNumber = "96"
                   offsetFromSymbolStart = "1200">
                </Location>
                <Location
@@ -57,11 +57,11 @@
                   moduleName = "Petriloquist"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/KirillShteffen/Petriloquist/Petriloquist/TalkModeViewController.swift"
-                  timestampString = "576756778.198921"
+                  timestampString = "577016912.365381"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "90"
-                  endingLineNumber = "90"
+                  startingLineNumber = "96"
+                  endingLineNumber = "96"
                   offsetFromSymbolStart = "148">
                </Location>
             </Locations>
@@ -74,12 +74,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/CentralBluetoothManager.swift"
-            timestampString = "577007352.8759789"
+            timestampString = "577016911.975298"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "226"
-            endingLineNumber = "226"
-            landmarkName = "peripheral(_:didDiscoverCharacteristicsFor:error:)"
+            startingLineNumber = "129"
+            endingLineNumber = "129"
+            landmarkName = "receiveVoiceData(dataPiece:isL2Cap:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -90,12 +90,28 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Petriloquist/CentralBluetoothManager.swift"
-            timestampString = "577007352.876457"
+            timestampString = "577016911.975783"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "278"
-            endingLineNumber = "278"
+            startingLineNumber = "291"
+            endingLineNumber = "291"
             landmarkName = "peripheral(_:didUpdateValueFor:error:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Petriloquist/CentralBluetoothManager.swift"
+            timestampString = "577016911.976076"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "118"
+            endingLineNumber = "118"
+            landmarkName = "receiveVoiceData(dataPiece:isL2Cap:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

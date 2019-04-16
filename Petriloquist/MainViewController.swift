@@ -74,7 +74,24 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     var selectedSendingType: sendingType = .l2Cap
     var managerBluetooth = CentralBluetoothManager()
     
-    
+    //Cypess testing variables
+    var transferStartTime: NSDate!
+    var lastConnectionInterval: TimeInterval! = 0
+    var connectionIntervals: [TimeInterval] = []
+    var averageConnectionInterval: TimeInterval {
+        get {
+            if connectionIntervals.count > UInt8.max {
+                connectionIntervals = [connectionIntervals.last!]
+                return connectionIntervals.last!
+            }
+            var sum: TimeInterval = 0
+            for interval in connectionIntervals {
+                sum += interval
+            }
+            return sum / Double(connectionIntervals.count)
+        }
+    }
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
         //UIpreparation
@@ -86,10 +103,11 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     
     override func viewWillAppear(_ animated: Bool) {
         managerBluetooth.uiDelegate = self
+        managerBluetooth.sendingMode = .speedTest
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        guard managerBluetooth.peripheral.state == .connected else { return }
+        guard managerBluetooth.peripheral != nil, managerBluetooth.peripheral.state == .connected else { return }
         managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
     }
     
@@ -166,31 +184,38 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
                                                type: .withResponse)
     }
     
-    func cypressTestDataAssembling() {
-        let byteCount = 495
-        var value: UInt8 = 0
-        for _ in 0..<byteCount {
+    //MARK: Cypress testing method
+    func cypressSendArray() {
+            let byteCount = 508
+            let withResponse = false
             
-            wholeTestData.append(value)
-            if value == 255 {
-                value = 0
-            } else {
-                value += 1
+            //print("TRYING TO SEND \(byteCount) bytes.")
+            guard managerBluetooth.peripheral.canSendWriteWithoutResponse else {
+                //print("Can't send write without response!")
+                return
             }
+            let newConnectionInterval = Date().timeIntervalSince(transferStartTime as Date)
+            let connectionDelta = newConnectionInterval - lastConnectionInterval
+            connectionIntervals.append(connectionDelta)
+            let kbitSpeed = ((Double(byteCount) / averageConnectionInterval) * 8) / 1000
+            print("Average ConnectionInterval: \(round(averageConnectionInterval * 10000) / 10000)")
+        
+            //SPEED RESULT
+            print("Possible transfer speed: \(round(kbitSpeed * 10) / 10) kbps")
+
+            lastConnectionInterval = newConnectionInterval
+            
+            let testArray = Array(repeating: Float32(1), count: byteCount / 4)
+            print("Sending \(connectionIntervals.count - 1) byte")
+            var testData = Data()
+            testData.append(UInt8(1))
+            let dataFiller = Data(bytes: testArray, count: byteCount)
+            testData.append(dataFiller)
+            managerBluetooth.peripheral.writeValue(testData,
+                                                   for: managerBluetooth.rxCharacteristic,
+                                                   type: .withoutResponse)
         }
-    }
     
-    func cypressSendArrayResp() {
-        cypressTestDataAssembling()
-        print(Array(wholeTestData))
-        //print("TRYING TO SEND \(byteCount) bytes.")
-        guard managerBluetooth.peripheral.canSendWriteWithoutResponse else {
-            return
-        }
-        managerBluetooth.peripheral.writeValue(wholeTestData,
-                                               for: managerBluetooth.cypressCharacteristic,
-                                               type: .withoutResponse)
-    }
     
     func sendPeripheralModeSwitcher() {
         var packetSize = String(0)

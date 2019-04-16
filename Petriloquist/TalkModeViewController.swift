@@ -66,10 +66,11 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         managerBluetooth.uiDelegate = self
+        managerBluetooth.sendingMode = .voice
     }
     
     override func viewWillDisappear(_ animated: Bool) {
-        guard managerBluetooth.peripheral.state == .connected else { return }
+        guard managerBluetooth.peripheral != nil, managerBluetooth.peripheral.state == .connected else { return }
         managerBluetooth.disconnect(peripheral: managerBluetooth.peripheral)
     }
     
