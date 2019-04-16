@@ -109,6 +109,7 @@ class CentralBluetoothManager: NSObject {
             //receiveTestData(dataPiece: receivedData, isL2Cap: true)
         }
         if sendingMode == .voice {
+            print("RECEIVING VOICE")
             receiveVoiceData(dataPiece: receivedData, isL2Cap: true)
         }
     }
@@ -287,6 +288,11 @@ extension CentralBluetoothManager: CBPeripheralDelegate {
                 self.uiDelegate?.recSamples = []
                 self.uiDelegate?.sendingTimerStart()
             }
+            
+            if result == "VoiceStarted" {
+                transferIsEnded = false
+            }
+            
             if result == "VoiceEnded" {
                 stopVoiceReceiving()
             }

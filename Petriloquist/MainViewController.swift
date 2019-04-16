@@ -186,35 +186,31 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
     
     //MARK: Cypress testing method
     func cypressSendArray() {
-            let byteCount = 508
-            let withResponse = false
-            
-            //print("TRYING TO SEND \(byteCount) bytes.")
-            guard managerBluetooth.peripheral.canSendWriteWithoutResponse else {
-                //print("Can't send write without response!")
-                return
-            }
-            let newConnectionInterval = Date().timeIntervalSince(transferStartTime as Date)
-            let connectionDelta = newConnectionInterval - lastConnectionInterval
-            connectionIntervals.append(connectionDelta)
-            let kbitSpeed = ((Double(byteCount) / averageConnectionInterval) * 8) / 1000
-            print("Average ConnectionInterval: \(round(averageConnectionInterval * 10000) / 10000)")
-        
-            //SPEED RESULT
-            print("Possible transfer speed: \(round(kbitSpeed * 10) / 10) kbps")
-
-            lastConnectionInterval = newConnectionInterval
-            
-            let testArray = Array(repeating: Float32(1), count: byteCount / 4)
-            print("Sending \(connectionIntervals.count - 1) byte")
-            var testData = Data()
-            testData.append(UInt8(1))
-            let dataFiller = Data(bytes: testArray, count: byteCount)
-            testData.append(dataFiller)
-            managerBluetooth.peripheral.writeValue(testData,
-                                                   for: managerBluetooth.rxCharacteristic,
-                                                   type: .withoutResponse)
+        let byteCount = 508
+        guard managerBluetooth.peripheral.canSendWriteWithoutResponse else {
+            print("Can't send write without response!")
+            return
         }
+        let newConnectionInterval = Date().timeIntervalSince(transferStartTime as Date)
+        let connectionDelta = newConnectionInterval - lastConnectionInterval
+        connectionIntervals.append(connectionDelta)
+        let kbitSpeed = ((Double(byteCount) / averageConnectionInterval) * 8) / 1000
+        print("Average ConnectionInterval: \(round(averageConnectionInterval * 10000) / 10000)")
+        
+        //SPEED RESULT
+        print("Possible transfer speed: \(round(kbitSpeed * 10) / 10) kbps")
+        
+        lastConnectionInterval = newConnectionInterval
+        let testArray = Array(repeating: Float32(1), count: byteCount / 4)
+        print("Sending \(connectionIntervals.count - 1) byte")
+        var testData = Data()
+        testData.append(UInt8(1))
+        let dataFiller = Data(bytes: testArray, count: byteCount)
+        testData.append(dataFiller)
+        managerBluetooth.peripheral.writeValue(testData,
+                                               for: managerBluetooth.rxCharacteristic,
+                                               type: .withoutResponse)
+    }
     
     
     func sendPeripheralModeSwitcher() {
