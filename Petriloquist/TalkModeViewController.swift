@@ -323,7 +323,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         print("STOP RECORDING")
         //Record and send testing
         audioInput.stopRecording()
-        audioInput.audioUnit = nil
+        //audioInput.audioUnit = nil
         testDataTimer.invalidate()
         uiUpdate(uiState: .dataHasSent)
         sendTotalRecordedDataCount()
