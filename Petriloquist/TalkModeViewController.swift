@@ -168,12 +168,6 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         case .withoutResponse:
             charDataSend(withResponse: false)
         }
-//        if wholeTestData.count - startingPoint <= 0 {
-//            testDataTimer.invalidate()
-//            startingPoint = 0
-//
-//            print("DATA SENT")
-//        }
     }
     
     func close() {
@@ -323,20 +317,13 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
         //Begin sending cycle - continuation after characteristic respond in CentralBluetoothManager
         sendPeripheralStateSwitcher()
         managerBluetooth.voiceTransferStarted = true
-        //AudioUnit implemented playback
-        //        do {
-        //            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
-        //            try AVAudioSession.sharedInstance().setActive(true)
-        //        } catch {
-        //            print(error)
-        //        }
-        //        toneGenerator.start()
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
         print("STOP RECORDING")
         //Record and send testing
         audioInput.stopRecording()
+        audioInput.audioUnit = nil
         testDataTimer.invalidate()
         uiUpdate(uiState: .dataHasSent)
         sendTotalRecordedDataCount()

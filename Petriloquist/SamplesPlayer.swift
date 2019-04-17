@@ -10,7 +10,8 @@ import AVFoundation
 
 class SamplesPlayer {
     
-    fileprivate var toneUnit: AudioUnit? = nil
+    let audioSession : AVAudioSession = AVAudioSession.sharedInstance()
+    var audioUnit: AudioUnit? = nil
     static let sampleRate = 4000
     static let amplitude: Float = 1.0
     static let frequency: Float = 440
@@ -19,11 +20,13 @@ class SamplesPlayer {
     static var playerIsStarted: Bool = false
     static var pcmArray: [Float] = [] {
         didSet {
-            print("PCM ARRAY COUNT: \(pcmArray.count)")
+            //print("PCM ARRAY COUNT: \(pcmArray.count)")
         }
     }
     
     /// Theta is changed over time as each sample is provided.
+    static var theta: Float = 0.0
+    
     private let renderCallback: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
         
         guard let abl = UnsafeMutableAudioBufferListPointer(ioData) else { return 0 }
@@ -44,15 +47,17 @@ class SamplesPlayer {
     }
     
     init() {
-        setupAudioUnit()
-        
+        if self.audioUnit == nil {
+            setupAudioSession()
+            setupAudioUnit()
+        }
         //Test playback from bundle AudioFile
         //        let trackURL = URL(fileURLWithPath: path ?? "")
         //        SamplesPlayer.pcmArray = readFile(url: trackURL)
     }
     
     deinit {
-        //stop()
+        stop()
     }
     
     func readFile(url: URL) -> [Float] {
@@ -83,6 +88,36 @@ class SamplesPlayer {
         return array
     }
     
+    private func setupAudioSession() {
+        
+//        if !audioSession.availableCategories.contains(AVAudioSession.Category.playAndRecord) {
+//            print("can't record! bailing.")
+//            return
+//        }
+        
+        do {
+            try audioSession.setCategory(AVAudioSession.Category.playback)
+            
+            // "Appropriate for applications that wish to minimize the effect of system-supplied signal processing for input and/or output audio signals."
+            // NB: This turns off the high-pass filter that CoreAudio normally applies.
+            try audioSession.setMode(AVAudioSession.Mode.measurement)
+            
+            try audioSession.setPreferredSampleRate(Double(SamplesPlayer.sampleRate))
+            
+            // This will have an impact on CPU usage. .01 gives 512 samples per frame on iPhone. (Probably .01 * 44100 rounded up.)
+            // NB: This is considered a 'hint' and more often than not is just ignored.
+            try audioSession.setPreferredIOBufferDuration(0.01)
+            
+            //            audioSession.requestRecordPermission { (granted) -> Void in
+            //                if !granted {
+            //                    print("*** record permission denied")
+            //                }
+            //            }
+        } catch {
+            print("*** audioSession error: \(error)")
+        }
+    }
+    
     func setupAudioUnit() {
         
         // Configure the description of the output audio component we want to find:
@@ -92,8 +127,7 @@ class SamplesPlayer {
         #else
         componentSubtype = kAudioUnitSubType_RemoteIO
         #endif
-        var defaultOutputDescription = AudioComponentDescription(componentType: kAudioUnitType_Output,
-                                                                 componentSubType: componentSubtype,
+        var defaultOutputDescription = AudioComponentDescription(componentType:kAudioUnitType_Output,                                                                                    componentSubType: componentSubtype,
                                                                  componentManufacturer: kAudioUnitManufacturer_Apple,
                                                                  componentFlags: 0,
                                                                  componentFlagsMask: 0)
@@ -102,13 +136,13 @@ class SamplesPlayer {
         var err: OSStatus
         
         // Create a new instance of it in the form of our audio unit:
-        err = AudioComponentInstanceNew(defaultOutput!, &toneUnit)
+        err = AudioComponentInstanceNew(defaultOutput!, &audioUnit)
         assert(err == noErr, "AudioComponentInstanceNew failed")
         
         // Set the render callback as the input for our audio unit:
         var renderCallbackStruct = AURenderCallbackStruct(inputProc: renderCallback as! AURenderCallback,
                                                           inputProcRefCon: nil)
-        err = AudioUnitSetProperty(toneUnit!,
+        err = AudioUnitSetProperty(audioUnit!,
                                    kAudioUnitProperty_SetRenderCallback,
                                    kAudioUnitScope_Input,
                                    0,
@@ -121,12 +155,12 @@ class SamplesPlayer {
                                                        mFormatID: kAudioFormatLinearPCM,
                                                        mFormatFlags: kAudioFormatFlagsNativeFloatPacked|kAudioFormatFlagIsNonInterleaved,
                                                        mBytesPerPacket: 4 /*four bytes per float*/,
-                                                        mFramesPerPacket: 1,
-                                                        mBytesPerFrame: 4,
-                                                        mChannelsPerFrame: 1,
-                                                        mBitsPerChannel: 4*8,
-                                                        mReserved: 0)
-        err = AudioUnitSetProperty(toneUnit!,
+            mFramesPerPacket: 1,
+            mBytesPerFrame: 4,
+            mChannelsPerFrame: 1,
+            mBitsPerChannel: 4*8,
+            mReserved: 0)
+        err = AudioUnitSetProperty(audioUnit!,
                                    kAudioUnitProperty_StreamFormat,
                                    kAudioUnitScope_Input,
                                    0,
@@ -137,17 +171,36 @@ class SamplesPlayer {
     
     func start() {
         print("Samples Player STARTED. PCM ARRAY COUNT: \(SamplesPlayer.pcmArray.count)")
+        setupAudioSession()
+        setupAudioUnit()
+        do {
+            try self.audioSession.setActive(true)
+        } catch {
+            print("*** startPlaying error: \(error)")
+        }
         var status: OSStatus
-        status = AudioUnitInitialize(toneUnit!)
-        status = AudioOutputUnitStart(toneUnit!)
+        
+        
+       
+        status = AudioUnitInitialize(audioUnit!)
+        assert(status == noErr, "*** AudioUnitInitialize err \(status)")
+        status = AudioOutputUnitStart(audioUnit!)
+        assert(status == noErr, "*** AudioOutputUnitStart err \(status)")
         assert(status == noErr)
     }
     
     func stop() {
         print("Samples Player STOPPED. PCM ARRAY COUNT: \(SamplesPlayer.pcmArray.count)")
-        AudioOutputUnitStop(toneUnit!)
-        AudioUnitUninitialize(toneUnit!)
-        SamplesPlayer.shift = 0
         
+        AudioOutputUnitStop(audioUnit!)
+        AudioUnitUninitialize(audioUnit!)
+        do {
+            try self.audioSession.setActive(false)
+        } catch {
+            print("*** startPlaying error: \(error)")
+        }
+        //AudioComponentInstanceDispose(audioUnit!)
+        //audioUnit = nil
+        SamplesPlayer.shift = 0
     }
 }

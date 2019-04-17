@@ -126,7 +126,6 @@ class CentralBluetoothManager: NSObject {
             stData.mainData.append(dataPiece)
             stData.packetCounter += 1
             SamplesPlayer.pcmArray = stData.mainData.toArray(type: Float.self)
-            
             if SamplesPlayer.pcmArray.count > 100 && !playerIsStarted {
                 samplesPlayer.start()
                 playerIsStarted = true
@@ -136,12 +135,13 @@ class CentralBluetoothManager: NSObject {
     
     func stopVoiceReceiving() {
         stData.arrayCount = 1024
-        
+        stData.packetCounter = 0
         samplesPlayer.stop()
         playerIsStarted = false
         transferIsEnded = true
         stData.mainData = Data()
         SamplesPlayer.pcmArray = []
+        //samplesPlayer.audioUnit = nil
     }
     
 }

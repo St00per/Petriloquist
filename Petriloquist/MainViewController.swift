@@ -49,9 +49,7 @@ class MainViewController: UIViewController, AVAudioRecorderDelegate, BluetoothMa
         case withoutResponse
     }
  
-    var recordingSession: AVAudioSession!
-    var audioRecorder: AVAudioRecorder!
-    //var audioCodec: AudioCodec!
+    
     var audioInput: TempiAudioInput!
     var testArray: [Float32] = []
     var recSamples: [Float] = [] {

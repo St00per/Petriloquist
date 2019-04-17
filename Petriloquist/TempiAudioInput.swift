@@ -16,7 +16,7 @@ typealias TempiAudioInputCallback = (
 /// TempiAudioInput sets up an audio input session and notifies when new buffer data is available.
 class TempiAudioInput: NSObject {
     
-    private(set) var audioUnit: AudioUnit!
+    var audioUnit: AudioUnit!
     let audioSession : AVAudioSession = AVAudioSession.sharedInstance()
     var sampleRate: Float
     var numberOfChannels: Int
@@ -45,12 +45,9 @@ class TempiAudioInput: NSObject {
     func startRecording() {
         print ("START RECORDING")
         do {
-            
-            if self.audioUnit == nil {
-                setupAudioSession()
-                setupAudioUnit()
-            }
-            
+            setupAudioSession()
+            setupAudioUnit()
+      
             try self.audioSession.setActive(true)
             var osErr: OSStatus = 0
             
@@ -68,10 +65,12 @@ class TempiAudioInput: NSObject {
         print ("STOP RECORDING")
         do {
             var osErr: OSStatus = 0
-            
+            osErr = AudioOutputUnitStop(self.audioUnit)
+            assert(osErr == noErr, "*** AudioOutputUnitStop err \(osErr)")
             osErr = AudioUnitUninitialize(self.audioUnit)
-            assert(osErr == noErr, "*** AudioUnitUninitialize err \(osErr)")
-            
+            osErr = AudioComponentInstanceDispose(self.audioUnit)
+            assert(osErr == noErr, "*** AudioComponentInstanceDispose err \(osErr)")
+            //self.audioUnit = nil
             try self.audioSession.setActive(false)
         } catch {
             print("*** error: \(error)")
@@ -119,14 +118,15 @@ class TempiAudioInput: NSObject {
         return 0
     }
     
-    private func setupAudioSession() {
+    func setupAudioSession() {
         
-        if !audioSession.availableCategories.contains(AVAudioSession.Category.record) {
-            print("can't record! bailing.")
-            return
-        }
+//        if !audioSession.availableCategories.contains(AVAudioSession.Category.record) {
+//            print("can't record! bailing.")
+//            return
+//        }
         
         do {
+            
             try audioSession.setCategory(AVAudioSession.Category.record)
             
             // "Appropriate for applications that wish to minimize the effect of system-supplied signal processing for input and/or output audio signals."
@@ -181,7 +181,7 @@ class TempiAudioInput: NSObject {
             &one,
             UInt32(MemoryLayout<UInt32>.size))
         assert(osErr == noErr, "*** AudioUnitSetProperty err \(osErr)")
-        
+        // Enable I/O for output.
         osErr = AudioUnitSetProperty(audioUnit,
             kAudioOutputUnitProperty_EnableIO,
             kAudioUnitScope_Output,
