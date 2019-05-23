@@ -12,7 +12,7 @@ class SamplesPlayer {
     
     let audioSession : AVAudioSession = AVAudioSession.sharedInstance()
     var audioUnit: AudioUnit? = nil
-    static let sampleRate = 4000
+    static let sampleRate = 8000
     static let amplitude: Float = 1.0
     static let frequency: Float = 440
     let path = Bundle.main.path(forResource: "TestRecord", ofType: "wav")
@@ -29,8 +29,8 @@ class SamplesPlayer {
     
     private let renderCallback: AURenderCallback = { (inRefCon, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData) -> OSStatus in
         
-        guard let abl = UnsafeMutableAudioBufferListPointer(ioData) else { return 0 }
-        let buffer = abl[0]
+        guard let audioBufferList = UnsafeMutableAudioBufferListPointer(ioData) else { return 0 }
+        let buffer = audioBufferList[0]
         let pointer: UnsafeMutableBufferPointer<Float32> = UnsafeMutableBufferPointer(buffer)
         
         var maximumIndex = Int((inNumberFrames - 1) + UInt32(shift))
@@ -47,17 +47,17 @@ class SamplesPlayer {
     }
     
     init() {
-        if self.audioUnit == nil {
-            setupAudioSession()
-            setupAudioUnit()
-        }
+//        if self.audioUnit == nil {
+//            setupAudioSession()
+//            setupAudioUnit()
+//        }
         //Test playback from bundle AudioFile
         //        let trackURL = URL(fileURLWithPath: path ?? "")
         //        SamplesPlayer.pcmArray = readFile(url: trackURL)
     }
     
     deinit {
-        stop()
+        //stop()
     }
     
     func readFile(url: URL) -> [Float] {

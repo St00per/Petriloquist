@@ -55,9 +55,9 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
             
             self.recSamples.append(contentsOf: samples)
             self.wholeTestData = Data(buffer: UnsafeBufferPointer(start: &self.recSamples, count: self.recSamples.count))
-            //print(self.recSamples.count)
+            print(self.recSamples.count)
         }
-        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 4000, numberOfChannels: 1)
+        audioInput = TempiAudioInput(audioInputCallback: audioInputCallback, sampleRate: 8000, numberOfChannels: 1)
         
         //Bluetooth manager init
         managerBluetooth = CentralBluetoothManager.default
@@ -306,7 +306,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     }
     
     @IBAction func startTalk(_ sender: UIButton) {
-        print("START RECORDING")
+        
         guard managerBluetooth.peripheral.state == .connected else { return }
         //Start mic recording
         audioInput.startRecording()
@@ -320,7 +320,7 @@ class TalkModeViewController: UIViewController, BluetoothManagerUIDelegate {
     }
     
     @IBAction func stopTalk(_ sender: UIButton) {
-        print("STOP RECORDING")
+        
         //Record and send testing
         audioInput.stopRecording()
         //audioInput.audioUnit = nil

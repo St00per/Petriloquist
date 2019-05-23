@@ -20,7 +20,7 @@ class TempiAudioInput: NSObject {
     let audioSession : AVAudioSession = AVAudioSession.sharedInstance()
     var sampleRate: Float
     var numberOfChannels: Int
-    let audioConverter: AudioBufferConverter
+    //let audioConverter: AudioBufferConverter
     /// When true, performs DC offset rejection on the incoming buffer before invoking the audioInputCallback.
     var shouldPerformDCOffsetRejection: Bool = false
     
@@ -33,17 +33,17 @@ class TempiAudioInput: NSObject {
     /// - Parameter sampleRate: The sample rate to set up the audio session with.
     /// - Parameter numberOfChannels: The number of channels to set up the audio session with.
     
-    init(audioInputCallback callback: @escaping TempiAudioInputCallback, sampleRate: Float = 4000.0, numberOfChannels: Int = 2) {
+    init(audioInputCallback callback: @escaping TempiAudioInputCallback, sampleRate: Float = 8000.0, numberOfChannels: Int = 1) {
         
         self.sampleRate = sampleRate
         self.numberOfChannels = numberOfChannels
         audioInputCallback = callback
-        audioConverter = AudioBufferConverter()
+        //audioConverter = AudioBufferConverter()
     }
 
     /// Start recording. Prompts for access to microphone if necessary.
     func startRecording() {
-        print ("START RECORDING")
+        print("INIT RECORDER")
         do {
             setupAudioSession()
             setupAudioUnit()
@@ -55,6 +55,7 @@ class TempiAudioInput: NSObject {
             assert(osErr == noErr, "*** AudioUnitInitialize err \(osErr)")
             osErr = AudioOutputUnitStart(self.audioUnit)
             assert(osErr == noErr, "*** AudioOutputUnitStart err \(osErr)")
+            print ("START RECORDING")
         } catch {
             print("*** startRecording error: \(error)")
         }
@@ -62,11 +63,12 @@ class TempiAudioInput: NSObject {
     
     /// Stop recording.
     func stopRecording() {
-        print ("STOP RECORDING")
+        
         do {
             var osErr: OSStatus = 0
             osErr = AudioOutputUnitStop(self.audioUnit)
             assert(osErr == noErr, "*** AudioOutputUnitStop err \(osErr)")
+            print ("STOP RECORDING")
             osErr = AudioUnitUninitialize(self.audioUnit)
             //osErr = AudioComponentInstanceDispose(self.audioUnit)
             assert(osErr == noErr, "*** AudioComponentInstanceDispose err \(osErr)")
@@ -90,6 +92,7 @@ class TempiAudioInput: NSObject {
                 mDataByteSize: 4,
                 mData: nil))
         
+        //Apply buffer to AudioUnit input
         osErr = AudioUnitRender(audioInput.audioUnit,
             ioActionFlags,
             inTimeStamp,
@@ -100,10 +103,10 @@ class TempiAudioInput: NSObject {
         
         // Move samples from mData into our native [Float] format.
         var monoSamples = [Float]()
-        let ptr = bufferList.mBuffers.mData?.assumingMemoryBound(to: Float.self)
-        monoSamples.append(contentsOf: UnsafeBufferPointer(start: ptr, count: Int(inNumberFrames)))
+        let pointer = bufferList.mBuffers.mData?.assumingMemoryBound(to: Float.self)
+        monoSamples.append(contentsOf: UnsafeBufferPointer(start: pointer, count: Int(inNumberFrames)))
         
-        let outputFormat = AudioBufferFormatHelper.AACFormat()
+        //let outputFormat = AudioBufferFormatHelper.AACFormat()
         //let inputFormat = bufferList.mBuffers.
         
         if audioInput.shouldPerformDCOffsetRejection {
@@ -126,7 +129,7 @@ class TempiAudioInput: NSObject {
             
             // "Appropriate for applications that wish to minimize the effect of system-supplied signal processing for input and/or output audio signals."
             // NB: This turns off the high-pass filter that CoreAudio normally applies.
-            try audioSession.setMode(AVAudioSession.Mode.voiceChat)
+            //try audioSession.setMode(AVAudioSession.Mode.)
             
             try audioSession.setPreferredSampleRate(Double(sampleRate))
             
@@ -188,7 +191,7 @@ class TempiAudioInput: NSObject {
         // Set format to 32 bit, floating point, linear PCM
         var streamFormatDesc:AudioStreamBasicDescription = AudioStreamBasicDescription(
             mSampleRate:        Double(SamplesPlayer.sampleRate),
-            mFormatID:          kAudioFormatLinearPCM,
+            mFormatID:          kAudioFormatALaw,
             mFormatFlags:       kAudioFormatFlagsNativeFloatPacked | kAudioFormatFlagIsNonInterleaved, // floating point data - docs say this is fastest
             mBytesPerPacket:    4,
             mFramesPerPacket:   1,
@@ -198,7 +201,14 @@ class TempiAudioInput: NSObject {
             mReserved: 0
         )
         
-        // Set format for input and output busses
+        //Filling in ASBD with AudioFormatGetProperty()
+        var propSize: UInt32 = UInt32(MemoryLayout.size(ofValue: streamFormatDesc))
+            osErr = AudioFormatGetProperty(kAudioFormatProperty_FormatInfo, 0, nil, &propSize, &streamFormatDesc)
+        
+        assert(osErr == noErr, "*** StreamFormatGetProperty err \(osErr)")
+        print(streamFormatDesc)
+        
+        // Set format for input of AudioUnit
         osErr = AudioUnitSetProperty(audioUnit,
             kAudioUnitProperty_StreamFormat,
             kAudioUnitScope_Input, outputBus,
@@ -206,6 +216,7 @@ class TempiAudioInput: NSObject {
             UInt32(MemoryLayout<AudioStreamBasicDescription>.size))
         assert(osErr == noErr, "*** AudioUnitSetProperty err \(osErr)")
         
+        // Set format for output of AudioUnit
         osErr = AudioUnitSetProperty(audioUnit,
             kAudioUnitProperty_StreamFormat,
             kAudioUnitScope_Output,
@@ -216,6 +227,8 @@ class TempiAudioInput: NSObject {
         
         // Set up our callback.
         var inputCallbackStruct = AURenderCallbackStruct(inputProc: recordingCallback, inputProcRefCon: UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque()))
+        
+        //Apply callback struct to AudioUnit
         osErr = AudioUnitSetProperty(audioUnit,
             AudioUnitPropertyID(kAudioOutputUnitProperty_SetInputCallback),
             AudioUnitScope(kAudioUnitScope_Global),
